@@ -1,0 +1,47 @@
+# Build outputs
+build/
+out/
+.gradle/
+*.class
+*.jar
+*.aar
+*.iml
+
+# Gradle wrapper JAR is small, deterministic, and must be checked in so
+# fresh clones can run ./gradlew without installing Gradle first.
+!gradle/wrapper/gradle-wrapper.jar
+
+# IDE
+.idea/
+*.swp
+*.iws
+
+# Local configuration
+local.properties
+keystore.properties
+*.keystore
+*.jks
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs / env
+*.log
+.env*
+
+# Captures + profile
+captures/
+.cxx/
+
+# Generated API baseline working files (commit api/*.api itself; ignore working state)
+sdk/api/*.api.tmp
+
+# Kotlin compiler cache
+.kotlin/
+
+# Tricycle workflow metadata (not source of truth; derived from specs/)
+.trc/
+
+# Auto-generated agent context (local-only; varies per contributor machine)
+CLAUDE.md
