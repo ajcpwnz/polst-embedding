@@ -1,0 +1,15 @@
+{
+  "originHash" : "f58c46f37e0f463b5f1b0243ea8e2bce5e4538bdd8bbf7a4be70da6848ff3863",
+  "pins" : [
+    {
+      "identity" : "polst-ios",
+      "kind" : "remoteSourceControl",
+      "location" : "git@github.com:ajcpwnz/polst-ios.git",
+      "state" : {
+        "branch" : "master",
+        "revision" : "86cfa5334b6243de1112960c1a1700a96ed5443b"
+      }
+    }
+  ],
+  "version" : 3
+}
