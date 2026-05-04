@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>iframe demo — Polst embedding</title>
     <link rel="stylesheet" href="../assets/chrome.css" />
+    <link rel="stylesheet" href="iframe.css" />
     <style>
       :root {
         --bg: #fafafa;
@@ -29,7 +30,7 @@
         line-height: 1.5;
       }
       .demo-wrap {
-        max-width: 720px;
+        max-width: 1120px;
         margin: 0 auto;
         padding: 32px 24px 96px;
       }
@@ -44,6 +45,11 @@
         display: block;
         margin-bottom: 12px;
       }
+      .demo-wrap p.lede {
+        margin: 0 0 24px;
+        color: var(--muted);
+        max-width: 640px;
+      }
     </style>
   </head>
   <body>
@@ -51,11 +57,25 @@
     <div class="demo-wrap">
       <span class="icon" aria-hidden="true">🪟</span>
       <h1>iframe</h1>
+      <p class="lede">
+        Drop a <code>&lt;iframe&gt;</code> on any page. Use the controls
+        below to tweak theme, accent, and visibility — the snippet on the
+        right updates in real time.
+      </p>
       <main id="demo"></main>
     </div>
     <script type="module">
       import { bootstrap } from '../assets/chrome-render.js';
+      import { init } from './iframe.js';
       bootstrap({ sourcePath: 'docs/iframe/index.html' });
+      // bootstrap() schedules DOMContentLoaded if needed; init() does the
+      // same defer to make sure the demo mount runs after the chrome bar
+      // and (when applicable) the empty-state placeholder are in place.
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init, { once: true });
+      } else {
+        init();
+      }
     </script>
   </body>
 </html>
