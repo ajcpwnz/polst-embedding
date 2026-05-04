@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>JS SDK demo — Polst embedding</title>
+    <style>
+      :root {
+        --bg: #fafafa;
+        --fg: #111;
+        --muted: #555;
+        --card-bg: #fff;
+        --card-border: #e5e5e5;
+        --accent: #2962ff;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0c0c0d;
+          --fg: #f5f5f5;
+          --muted: #a8a8a8;
+          --card-bg: #161618;
+          --card-border: #2a2a2d;
+          --accent: #82a9ff;
+        }
+      }
+      * { box-sizing: border-box; }
+      html, body {
+        margin: 0;
+        padding: 0;
+        background: var(--bg);
+        color: var(--fg);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, "Helvetica Neue", Arial, sans-serif;
+        line-height: 1.5;
+      }
+      .wrap {
+        max-width: 720px;
+        margin: 0 auto;
+        padding: 64px 24px 96px;
+      }
+      .back {
+        display: inline-block;
+        margin-bottom: 32px;
+        color: var(--accent);
+        text-decoration: none;
+        font-size: 0.95rem;
+      }
+      .back:hover { text-decoration: underline; }
+      h1 {
+        font-size: 1.75rem;
+        margin: 0 0 8px;
+        letter-spacing: -0.02em;
+      }
+      .icon { font-size: 2rem; line-height: 1; display: block; margin-bottom: 12px; }
+      .card {
+        margin-top: 32px;
+        padding: 24px;
+        border-radius: 12px;
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+      }
+      .card p { margin: 0; color: var(--muted); }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <a class="back" href="../">&larr; All modes</a>
+      <span class="icon" aria-hidden="true">🧩</span>
+      <h1>JS SDK</h1>
+      <div class="card">
+        <p>Coming soon — this demo is still under construction.</p>
+      </div>
+    </div>
+  </body>
+</html>
