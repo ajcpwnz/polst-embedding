@@ -19,5 +19,24 @@ jobs:
       - name: Wait for Pages rebuild
         run: sleep 30
 
-      - name: Verify deploy URL responds
-        run: curl -fsSI https://ajcpwnz.github.io/polst-embedding/
+      - name: Verify root + every mode page responds
+        env:
+          BASE: https://ajcpwnz.github.io/polst-embedding
+        run: |
+          set -euo pipefail
+          paths=("/" "/iframe/" "/script/" "/sdk/" "/api/" "/ios/" "/android/" "/rn/")
+          fail=0
+          for p in "${paths[@]}"; do
+            url="${BASE}${p}"
+            code=$(curl -fsSI -o /dev/null -w '%{http_code}' "$url" || true)
+            if [ "$code" = "200" ]; then
+              echo "OK  $code $url"
+            else
+              echo "FAIL $code $url" >&2
+              fail=1
+            fi
+          done
+          if [ "$fail" -ne 0 ]; then
+            echo "::error::One or more demo-site URLs did not return 200"
+            exit 1
+          fi
