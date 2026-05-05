@@ -1,0 +1,283 @@
+/* docs/sdk/sdk.css
+ *
+ * POL-775 — page-specific layout for the JS SDK demo. Uses `.sdk-*`
+ * class names so the page can diverge from the script-tag demo if
+ * needed without touching shared chrome CSS. Reuses --chrome-*
+ * variables from chrome.css for visual parity with siblings.
+ *
+ * Layout pattern (mirrors POL-774's structural shell):
+ *   - Tabs row
+ *   - Two-column grid (code on left, render on right)
+ *   - Snippet panel sits in the LEFT column for this demo (the
+ *     code-block IS the demonstration; the render panel is its
+ *     output, not a control surface).
+ */
+
+.sdk-demo {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ---------- Tabs ---------- */
+.sdk-tabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  background: var(--chrome-bg);
+  border: 1px solid var(--chrome-border);
+  border-radius: 10px;
+  align-self: flex-start;
+}
+
+.sdk-tab {
+  background: transparent;
+  color: var(--chrome-fg);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font: inherit;
+  font-size: 0.92rem;
+  cursor: pointer;
+}
+
+.sdk-tab:hover:not(:disabled) {
+  background: var(--chrome-input-bg);
+}
+
+.sdk-tab--active {
+  background: var(--chrome-accent);
+  color: #ffffff;
+  border-color: var(--chrome-accent);
+  cursor: default;
+}
+
+.sdk-tab--active:hover {
+  filter: brightness(1.05);
+}
+
+.sdk-tab:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ---------- Grid ---------- */
+.sdk-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 880px) {
+  .sdk-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Snippet panel (left) ---------- */
+.sdk-snippet {
+  background: var(--chrome-empty-bg);
+  border: 1px solid var(--chrome-border);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sdk-snippet__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sdk-snippet__header h2 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--chrome-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.sdk-snippet__copy {
+  background: var(--chrome-accent);
+  color: #ffffff;
+  border: 1px solid var(--chrome-accent);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.sdk-snippet__copy:hover {
+  filter: brightness(1.05);
+}
+
+.sdk-snippet__pre {
+  margin: 0;
+  padding: 12px;
+  background: var(--chrome-input-bg);
+  border: 1px solid var(--chrome-border);
+  border-radius: 8px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--chrome-fg);
+  white-space: pre;
+}
+
+.sdk-snippet__pre code {
+  font: inherit;
+  color: inherit;
+  background: none;
+}
+
+/* ---------- Render panel (right) ---------- */
+.sdk-render {
+  background: var(--chrome-empty-bg);
+  border: 1px solid var(--chrome-border);
+  border-radius: 12px;
+  padding: 16px;
+  min-height: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sdk-render__header {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--chrome-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.sdk-render__mount {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+.sdk-render__mount > * {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* ---------- Status messages ---------- */
+.sdk-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 auto;
+  font-size: 0.92rem;
+  color: var(--chrome-muted);
+  text-align: center;
+  padding: 24px;
+}
+
+.sdk-error {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  text-align: center;
+}
+
+.sdk-error__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--chrome-fg);
+}
+
+.sdk-error__detail {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--chrome-muted);
+  max-width: 36rem;
+  word-break: break-word;
+}
+
+.sdk-error__code {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+  font-size: 0.78rem;
+  color: var(--chrome-muted);
+  padding: 4px 8px;
+  background: var(--chrome-input-bg);
+  border: 1px solid var(--chrome-border);
+  border-radius: 6px;
+}
+
+/* ---------- Vote variant ---------- */
+.sdk-vote {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 auto;
+  padding: 24px;
+}
+
+.sdk-vote__buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.sdk-vote__btn {
+  background: var(--chrome-accent);
+  color: #ffffff;
+  border: 1px solid var(--chrome-accent);
+  border-radius: 8px;
+  padding: 10px 24px;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  min-width: 96px;
+}
+
+.sdk-vote__btn:hover:not(:disabled) {
+  filter: brightness(1.05);
+}
+
+.sdk-vote__btn:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.sdk-vote__result {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+  font-size: 0.82rem;
+  padding: 8px 12px;
+  background: var(--chrome-input-bg);
+  border: 1px solid var(--chrome-border);
+  border-radius: 6px;
+  color: var(--chrome-fg);
+  white-space: pre;
+}
+
+.sdk-vote__hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--chrome-muted);
+  max-width: 36rem;
+  text-align: center;
+}
