@@ -28,27 +28,23 @@ import {
   getPolstTarget,
 } from '../assets/chrome.js';
 
-/** @typedef {'polst' | 'campaign' | 'brand' | 'vote'} Tab */
+/** @typedef {'polst' | 'campaign' | 'brand'} Kind */
 
-const TAB_LABELS = Object.freeze({
+const KIND_LABELS = Object.freeze({
   polst: 'Polst',
   campaign: 'Campaign',
   brand: 'Brand feed',
-  vote: 'Vote',
 });
 
-/** @type {Tab[]} */
-const TAB_ORDER = ['polst', 'campaign', 'brand', 'vote'];
-
 /**
- * Per-tab snippet shown in the left column. The actual call site below
+ * Per-kind snippet shown in the left column. The actual call site below
  * MUST run the same characters; if you edit a snippet, update the call
  * site too (and vice-versa).
  *
- * The strings use template placeholders `${shortId}` / `${campaignId}`
- * / `${slug}` ONLY for readability — the snippet is rendered with the
- * real identifier inlined so what's displayed is what runs. (See
- * `materialiseSnippet`.)
+ * Vote is intentionally NOT a separate snippet — `renderPolst` already
+ * mounts the polst widget which includes Vote A / Vote B buttons. The
+ * vote action is an interaction inside the polst render, not a
+ * different demo mode.
  */
 const SNIPPETS = Object.freeze({
   polst:
@@ -62,10 +58,6 @@ renderCampaign(mountEl, { campaignId: campaign.id });`,
   brand:
 `const feed = await client.getBrandFeed("__ID__");
 renderBrandFeed(mountEl, { brandSlug: "__ID__", pageSize: feed.items.length });`,
-
-  vote:
-`const result = await client.polsts.vote("__ID__", choice);
-// result: { optionACount, optionBCount, ... }`,
 });
 
 const SETUP_SNIPPET =
@@ -183,35 +175,17 @@ export function mountSdkDemo(rootEl, target) {
 
   const client = new PolstClient({ baseUrl: getApiOrigin(getEnv()) });
 
-  /** @type {Tab} */
-  let activeTab = target.kind;
-
-  // ---------- Tabs row ----------
-  const tabsRow = el('div', { class: 'sdk-tabs', role: 'tablist' });
-  /** @type {Record<Tab, HTMLButtonElement>} */
-  const tabButtons = /** @type {any} */ ({});
-  for (const tab of TAB_ORDER) {
-    const btn = /** @type {HTMLButtonElement} */ (
-      el('button', {
-        type: 'button',
-        class: 'sdk-tab',
-        role: 'tab',
-        'data-tab': tab,
-      }, [TAB_LABELS[tab]])
-    );
-    if (tab === 'vote' && target.kind !== 'polst') {
-      btn.disabled = true;
-      btn.title = 'Vote requires a polst short id';
-    }
-    btn.addEventListener('click', () => {
-      if (btn.disabled || activeTab === tab) return;
-      activeTab = tab;
-      syncTabUi();
-      void runActiveTab();
-    });
-    tabButtons[tab] = btn;
-    tabsRow.append(btn);
-  }
+  // ---------- Kind indicator ----------
+  // The demo's mode is fully determined by the kind of link the visitor
+  // pasted into the chrome bar. No tab picker — the chrome's link
+  // parser is the single source of truth, and only the matching SDK
+  // surface is rendered. Polst-link → renderPolst (which includes the
+  // Vote buttons inside the widget). Campaign-link → renderCampaign.
+  // Brand-link → renderBrandFeed.
+  const indicator = el('div', { class: 'sdk-kind' }, [
+    el('span', { class: 'sdk-kind__label' }, ['Showing']),
+    el('span', { class: 'sdk-kind__value' }, [KIND_LABELS[target.kind]]),
+  ]);
 
   // ---------- Grid ----------
   const grid = el('div', { class: 'sdk-grid' });
@@ -251,26 +225,17 @@ export function mountSdkDemo(rootEl, target) {
   renderPanel.append(renderHeader, mountEl);
 
   grid.append(snippetPanel, renderPanel);
-  rootEl.append(tabsRow, grid);
-
-  // ---------- Wiring ----------
-  function syncTabUi() {
-    for (const tab of TAB_ORDER) {
-      const isActive = tab === activeTab;
-      tabButtons[tab].classList.toggle('sdk-tab--active', isActive);
-      tabButtons[tab].setAttribute('aria-selected', String(isActive));
-    }
-  }
+  rootEl.append(indicator, grid);
 
   /** @returns {Promise<void>} */
-  async function runActiveTab() {
+  async function run() {
     // The setup snippet (import + new PolstClient) is shown alongside
-    // the per-tab snippet so the displayed code is a complete, runnable
-    // recipe. Both halves run for real: the imports are at the top of
-    // this module; `client` is the real instance; and the per-tab call
-    // below executes the second half.
-    const tabSnippet = materialiseSnippet(SNIPPETS[activeTab], target.id);
-    code.textContent = `${SETUP_SNIPPET}\n\n${tabSnippet}`;
+    // the per-kind snippet so the displayed code is a complete,
+    // runnable recipe. Both halves run for real: the imports are at
+    // the top of this module; `client` is the real instance; and the
+    // per-kind call below executes the second half.
+    const kindSnippet = materialiseSnippet(SNIPPETS[target.kind], target.id);
+    code.textContent = `${SETUP_SNIPPET}\n\n${kindSnippet}`;
 
     // POL-788 follow-up: pass `apiOrigin` per-call to render helpers.
     // The widget's render path otherwise reads its REST origin from a
@@ -281,7 +246,7 @@ export function mountSdkDemo(rootEl, target) {
     // bypasses the global entirely.
     const apiOrigin = getApiOrigin(getEnv());
 
-    if (activeTab === 'polst') {
+    if (target.kind === 'polst') {
       renderStatus(mountEl, 'Loading polst…');
       try {
         const polst = await client.getPolst(target.id);
@@ -292,7 +257,7 @@ export function mountSdkDemo(rootEl, target) {
       return;
     }
 
-    if (activeTab === 'campaign') {
+    if (target.kind === 'campaign') {
       renderStatus(mountEl, 'Loading campaign…');
       try {
         const campaign = await client.getCampaign(target.id);
@@ -303,7 +268,7 @@ export function mountSdkDemo(rootEl, target) {
       return;
     }
 
-    if (activeTab === 'brand') {
+    if (target.kind === 'brand') {
       renderStatus(mountEl, 'Loading brand feed…');
       try {
         const feed = await client.getBrandFeed(target.id);
@@ -317,64 +282,9 @@ export function mountSdkDemo(rootEl, target) {
       }
       return;
     }
-
-    if (activeTab === 'vote') {
-      renderVoteUi();
-      return;
-    }
   }
 
-  /**
-   * Render the vote UI: two buttons + result panel + hint. Each click
-   * executes the displayed call (`client.polsts.vote(target.id, choice)`)
-   * and re-renders the polst widget with the freshest state.
-   */
-  function renderVoteUi() {
-    mountEl.innerHTML = '';
-    const wrap = el('div', { class: 'sdk-vote' });
-    const buttons = el('div', { class: 'sdk-vote__buttons' });
-    const btnA = /** @type {HTMLButtonElement} */ (
-      el('button', { type: 'button', class: 'sdk-vote__btn' }, ['Vote A'])
-    );
-    const btnB = /** @type {HTMLButtonElement} */ (
-      el('button', { type: 'button', class: 'sdk-vote__btn' }, ['Vote B'])
-    );
-    const result = el('pre', { class: 'sdk-vote__result' }, ['—']);
-    const hint = el('p', { class: 'sdk-vote__hint' }, [
-      'Click a button to cast a vote against the active env. The SDK ' +
-        'manages X-Device-Id and idempotency keys internally — no ' +
-        'demo-side header work.',
-    ]);
-
-    /**
-     * @param {'A' | 'B'} choice
-     */
-    async function castVote(choice) {
-      btnA.disabled = true;
-      btnB.disabled = true;
-      result.textContent = `Voting ${choice}…`;
-      try {
-        const voteResult = await client.polsts.vote(target.id, choice);
-        result.textContent = JSON.stringify(voteResult, null, 2);
-      } catch (err) {
-        const info = classifyError(err);
-        result.textContent = `${info.title}: ${info.detail}`;
-      } finally {
-        btnA.disabled = false;
-        btnB.disabled = false;
-      }
-    }
-
-    btnA.addEventListener('click', () => void castVote('A'));
-    btnB.addEventListener('click', () => void castVote('B'));
-
-    buttons.append(btnA, btnB);
-    wrap.append(buttons, result, hint);
-    mountEl.append(wrap);
-  }
-
-  syncTabUi();
-  void runActiveTab();
+  void run();
 }
 
 /**

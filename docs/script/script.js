@@ -309,30 +309,14 @@ export async function mountScriptDemo(rootEl, target) {
   /** @type {State} */
   const state = { ...DEFAULT_STATE, tab: target.kind };
 
-  // ---------- Tabs ----------
-  const tabsRow = el('div', { class: 'script-tabs', role: 'tablist' });
-  /** @type {Record<Tab, HTMLButtonElement>} */
-  const tabButtons = /** @type {any} */ ({});
-  /** @type {Tab[]} */
-  const tabOrder = ['polst', 'campaign', 'brand'];
-  for (const tab of tabOrder) {
-    const btn = /** @type {HTMLButtonElement} */ (
-      el('button', {
-        type: 'button',
-        class: 'script-tab',
-        role: 'tab',
-        'data-tab': tab,
-      }, [TAB_LABELS[tab]])
-    );
-    btn.addEventListener('click', () => {
-      if (state.tab === tab) return;
-      state.tab = tab;
-      syncTabUi();
-      update();
-    });
-    tabButtons[tab] = btn;
-    tabsRow.append(btn);
-  }
+  // ---------- Kind indicator ----------
+  // The demo's mode is fully determined by the kind of link the
+  // visitor pasted. No tab picker — only the matching `<div data-polst*>`
+  // marker is mounted, with the controls relevant to that kind.
+  const indicator = el('div', { class: 'script-kind' }, [
+    el('span', { class: 'script-kind__label' }, ['Showing']),
+    el('span', { class: 'script-kind__value' }, [TAB_LABELS[target.kind]]),
+  ]);
 
   // ---------- Body grid ----------
   const grid = el('div', { class: 'script-grid' });
@@ -343,48 +327,44 @@ export async function mountScriptDemo(rootEl, target) {
 
   const sideCol = el('div', { class: 'script-side' });
 
-  // ---------- Controls (per tab) ----------
-  /** @type {Record<Tab, HTMLElement>} */
-  const controlPanels = /** @type {any} */ ({});
-
-  for (const tab of tabOrder) {
-    const panel = el('div', { class: 'script-controls', 'data-tab': tab });
-    const heading = el('h2', { class: 'script-controls__heading' }, [
-      `${TAB_LABELS[tab]} controls`,
-    ]);
-    panel.append(heading);
-    panel.append(commonControlsForTab(tab));
-
-    if (tab === 'campaign') {
-      panel.append(
-        toggleControl('autoAdvance', 'auto advance', state.autoAdvance, (next) => {
-          state.autoAdvance = next;
-          update();
-        }),
-      );
-    }
-    if (tab === 'brand') {
-      panel.append(
-        selectControl(
-          'mode',
-          'mode',
-          [
-            { value: 'polsts', label: 'polsts' },
-            { value: 'campaigns', label: 'campaigns' },
-            { value: 'mixed', label: 'mixed' },
-          ],
-          state.mode,
-          (next) => {
-            state.mode = /** @type {BrandMode} */ (next);
-            update();
-          },
-        ),
-      );
-    }
-
-    controlPanels[tab] = panel;
-    sideCol.append(panel);
+  // ---------- Controls (kind-scoped) ----------
+  // Build only the panel for the auto-detected kind. The state object
+  // still carries every field for all kinds; irrelevant ones are not
+  // exercised in this run.
+  const panel = el('div', { class: 'script-controls', 'data-tab': target.kind });
+  panel.append(
+    el('h2', { class: 'script-controls__heading' }, [
+      `${TAB_LABELS[target.kind]} controls`,
+    ]),
+  );
+  panel.append(commonControlsForTab(target.kind));
+  if (target.kind === 'campaign') {
+    panel.append(
+      toggleControl('autoAdvance', 'auto advance', state.autoAdvance, (next) => {
+        state.autoAdvance = next;
+        update();
+      }),
+    );
   }
+  if (target.kind === 'brand') {
+    panel.append(
+      selectControl(
+        'mode',
+        'mode',
+        [
+          { value: 'polsts', label: 'polsts' },
+          { value: 'campaigns', label: 'campaigns' },
+          { value: 'mixed', label: 'mixed' },
+        ],
+        state.mode,
+        (next) => {
+          state.mode = /** @type {BrandMode} */ (next);
+          update();
+        },
+      ),
+    );
+  }
+  sideCol.append(panel);
 
   /**
    * @param {Tab} tab
@@ -433,34 +413,31 @@ export async function mountScriptDemo(rootEl, target) {
   }
 
   /**
-   * Mirror common-control state across all three panels so switching
-   * tabs preserves the visitor's last setting.
+   * Mirror common-control state into the (single) controls panel.
    */
   function syncCommonControls() {
-    for (const tab of tabOrder) {
-      const panel = controlPanels[tab];
-      const themeRadios = panel.querySelectorAll(
-        `input[type="radio"][name="${tab}-theme"]`,
-      );
-      themeRadios.forEach((r) => {
-        const radio = /** @type {HTMLInputElement} */ (r);
-        radio.checked = radio.value === state.theme;
-      });
-      const accentInput = /** @type {HTMLInputElement | null} */ (
-        panel.querySelector(`input[type="color"]#${tab}-accent`)
-      );
-      if (accentInput) {
-        accentInput.value = state.accent ? `#${state.accent}` : '#2962ff';
-      }
-      const hideTitle = /** @type {HTMLInputElement | null} */ (
-        panel.querySelector(`#${tab}-hideTitle`)
-      );
-      if (hideTitle) hideTitle.checked = state.hideTitle;
-      const hideBrand = /** @type {HTMLInputElement | null} */ (
-        panel.querySelector(`#${tab}-hideBrand`)
-      );
-      if (hideBrand) hideBrand.checked = state.hideBrand;
+    const tab = target.kind;
+    const themeRadios = panel.querySelectorAll(
+      `input[type="radio"][name="${tab}-theme"]`,
+    );
+    themeRadios.forEach((r) => {
+      const radio = /** @type {HTMLInputElement} */ (r);
+      radio.checked = radio.value === state.theme;
+    });
+    const accentInput = /** @type {HTMLInputElement | null} */ (
+      panel.querySelector(`input[type="color"]#${tab}-accent`)
+    );
+    if (accentInput) {
+      accentInput.value = state.accent ? `#${state.accent}` : '#2962ff';
     }
+    const hideTitle = /** @type {HTMLInputElement | null} */ (
+      panel.querySelector(`#${tab}-hideTitle`)
+    );
+    if (hideTitle) hideTitle.checked = state.hideTitle;
+    const hideBrand = /** @type {HTMLInputElement | null} */ (
+      panel.querySelector(`#${tab}-hideBrand`)
+    );
+    if (hideBrand) hideBrand.checked = state.hideBrand;
   }
 
   // ---------- Snippet panel ----------
@@ -495,17 +472,7 @@ export async function mountScriptDemo(rootEl, target) {
   sideCol.append(snippetPanel);
 
   grid.append(previewCol, sideCol);
-  rootEl.append(tabsRow, grid);
-
-  // ---------- Wiring ----------
-  function syncTabUi() {
-    for (const tab of tabOrder) {
-      const isActive = tab === state.tab;
-      tabButtons[tab].classList.toggle('script-tab--active', isActive);
-      tabButtons[tab].setAttribute('aria-selected', String(isActive));
-      controlPanels[tab].hidden = !isActive;
-    }
-  }
+  rootEl.append(indicator, grid);
 
   /**
    * Re-render the live marker. We always replace the element rather
@@ -524,7 +491,6 @@ export async function mountScriptDemo(rootEl, target) {
     code.textContent = buildSnippet(attrs);
   }
 
-  syncTabUi();
   update();
 }
 

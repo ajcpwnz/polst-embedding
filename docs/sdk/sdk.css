@@ -19,47 +19,29 @@
   gap: 16px;
 }
 
-/* ---------- Tabs ---------- */
-.sdk-tabs {
+/* ---------- Kind indicator ---------- */
+.sdk-kind {
   display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 12px;
   background: var(--chrome-bg);
   border: 1px solid var(--chrome-border);
   border-radius: 10px;
   align-self: flex-start;
-}
-
-.sdk-tab {
-  background: transparent;
-  color: var(--chrome-fg);
-  border: 1px solid transparent;
-  border-radius: 6px;
-  padding: 6px 14px;
-  font: inherit;
   font-size: 0.92rem;
-  cursor: pointer;
 }
 
-.sdk-tab:hover:not(:disabled) {
-  background: var(--chrome-input-bg);
+.sdk-kind__label {
+  color: var(--muted, #777);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.72rem;
 }
 
-.sdk-tab--active {
-  background: var(--chrome-accent);
-  color: #ffffff;
-  border-color: var(--chrome-accent);
-  cursor: default;
-}
-
-.sdk-tab--active:hover {
-  filter: brightness(1.05);
-}
-
-.sdk-tab:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
+.sdk-kind__value {
+  color: var(--chrome-fg);
+  font-weight: 600;
 }
 
 /* ---------- Grid ---------- */
@@ -223,61 +205,3 @@
   border-radius: 6px;
 }
 
-/* ---------- Vote variant ---------- */
-.sdk-vote {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  align-items: center;
-  justify-content: center;
-  flex: 1 1 auto;
-  padding: 24px;
-}
-
-.sdk-vote__buttons {
-  display: flex;
-  gap: 12px;
-}
-
-.sdk-vote__btn {
-  background: var(--chrome-accent);
-  color: #ffffff;
-  border: 1px solid var(--chrome-accent);
-  border-radius: 8px;
-  padding: 10px 24px;
-  font: inherit;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  min-width: 96px;
-}
-
-.sdk-vote__btn:hover:not(:disabled) {
-  filter: brightness(1.05);
-}
-
-.sdk-vote__btn:disabled {
-  opacity: 0.55;
-  cursor: wait;
-}
-
-.sdk-vote__result {
-  margin: 0;
-  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
-    "Liberation Mono", monospace;
-  font-size: 0.82rem;
-  padding: 8px 12px;
-  background: var(--chrome-input-bg);
-  border: 1px solid var(--chrome-border);
-  border-radius: 6px;
-  color: var(--chrome-fg);
-  white-space: pre;
-}
-
-.sdk-vote__hint {
-  margin: 0;
-  font-size: 0.85rem;
-  color: var(--chrome-muted);
-  max-width: 36rem;
-  text-align: center;
-}

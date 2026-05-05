@@ -233,30 +233,16 @@ export function mountIframeDemo(rootEl, target, appOrigin) {
   /** @type {State} */
   const state = { ...DEFAULT_STATE, tab: target.kind };
 
-  // ---------- Tabs ----------
-  const tabsRow = el('div', { class: 'iframe-tabs', role: 'tablist' });
-  /** @type {Record<Tab, HTMLButtonElement>} */
-  const tabButtons = /** @type {any} */ ({});
-  /** @type {Tab[]} */
-  const tabOrder = ['polst', 'campaign', 'brand'];
-  for (const tab of tabOrder) {
-    const btn = /** @type {HTMLButtonElement} */ (
-      el('button', {
-        type: 'button',
-        class: 'iframe-tab',
-        role: 'tab',
-        'data-tab': tab,
-      }, [TAB_LABELS[tab]])
-    );
-    btn.addEventListener('click', () => {
-      if (state.tab === tab) return;
-      state.tab = tab;
-      syncTabUi();
-      update();
-    });
-    tabButtons[tab] = btn;
-    tabsRow.append(btn);
-  }
+  // ---------- Kind indicator ----------
+  // The demo's mode is fully determined by the kind of link the
+  // visitor pasted into the chrome bar. No tab picker — only the
+  // matching iframe route renders, with the controls relevant to that
+  // kind. (Polst link → /embed/polst/<id>. Campaign → autoAdvance
+  // toggle becomes available. Brand → mode select becomes available.)
+  const indicator = el('div', { class: 'iframe-kind' }, [
+    el('span', { class: 'iframe-kind__label' }, ['Showing']),
+    el('span', { class: 'iframe-kind__value' }, [TAB_LABELS[target.kind]]),
+  ]);
 
   // ---------- Body grid ----------
   const grid = el('div', { class: 'iframe-grid' });
@@ -275,57 +261,49 @@ export function mountIframeDemo(rootEl, target, appOrigin) {
 
   const sideCol = el('div', { class: 'iframe-side' });
 
-  // ---------- Controls (per tab) ----------
-  // Each tab gets its own controls panel. Switching tabs hides the
-  // others but keeps DOM mounted so state-bound inputs survive.
-  /** @type {Record<Tab, HTMLElement>} */
-  const controlPanels = /** @type {any} */ ({});
-
-  // Each tab needs its own DOM (different ids on the radio groups etc.).
-  // Build them per tab for simplicity.
-  for (const tab of tabOrder) {
-    const panel = el('div', { class: 'iframe-controls', 'data-tab': tab });
-    const heading = el('h2', { class: 'iframe-controls__heading' }, [
-      `${TAB_LABELS[tab]} controls`,
-    ]);
-    panel.append(heading);
-
-    // Common controls.
-    panel.append(commonControlsForTab(tab));
-
-    if (tab === 'campaign') {
-      panel.append(
-        toggleControl('autoAdvance', 'auto advance', state.autoAdvance, (next) => {
-          state.autoAdvance = next;
-          update();
-        }),
-      );
-    }
-    if (tab === 'brand') {
-      panel.append(
-        selectControl(
-          'mode',
-          'mode',
-          [
-            { value: 'polsts', label: 'polsts' },
-            { value: 'campaigns', label: 'campaigns' },
-            { value: 'mixed', label: 'mixed' },
-          ],
-          state.mode,
-          (next) => {
-            state.mode = /** @type {BrandMode} */ (next);
-            update();
-          },
-        ),
-      );
-    }
-
-    controlPanels[tab] = panel;
-    sideCol.append(panel);
+  // ---------- Controls (kind-scoped) ----------
+  // Build only the panel for the auto-detected kind. The state object
+  // still carries every field for all kinds (theme, accent, hide*,
+  // autoAdvance, mode) so `buildSrc()` doesn't need a kind-aware
+  // signature; the irrelevant fields are simply not exercised.
+  const panel = el('div', { class: 'iframe-controls', 'data-tab': target.kind });
+  panel.append(
+    el('h2', { class: 'iframe-controls__heading' }, [
+      `${TAB_LABELS[target.kind]} controls`,
+    ]),
+  );
+  panel.append(commonControlsForTab(target.kind));
+  if (target.kind === 'campaign') {
+    panel.append(
+      toggleControl('autoAdvance', 'auto advance', state.autoAdvance, (next) => {
+        state.autoAdvance = next;
+        update();
+      }),
+    );
   }
+  if (target.kind === 'brand') {
+    panel.append(
+      selectControl(
+        'mode',
+        'mode',
+        [
+          { value: 'polsts', label: 'polsts' },
+          { value: 'campaigns', label: 'campaigns' },
+          { value: 'mixed', label: 'mixed' },
+        ],
+        state.mode,
+        (next) => {
+          state.mode = /** @type {BrandMode} */ (next);
+          update();
+        },
+      ),
+    );
+  }
+  sideCol.append(panel);
 
   /**
-   * Tab-scoped factory so the radio/input ids are unique across panels.
+   * Kind-scoped factory so the radio/input ids are unique within
+   * the panel even though there is now only one panel per page.
    * @param {Tab} tab
    * @returns {HTMLElement}
    */
@@ -372,37 +350,37 @@ export function mountIframeDemo(rootEl, target, appOrigin) {
   }
 
   /**
-   * Mirror common-control state across all three panels so switching
-   * tabs preserves the visitor's last setting.
+   * Mirror common-control state into the (single) controls panel. With
+   * the picker removed there's only one panel; the loop is preserved
+   * here as a no-op-friendly form so the call sites in the control
+   * factories don't need to change.
    */
   function syncCommonControls() {
-    for (const tab of tabOrder) {
-      const panel = controlPanels[tab];
-      // Theme radios.
-      const themeRadios = panel.querySelectorAll(
-        `input[type="radio"][name="${tab}-theme"]`,
-      );
-      themeRadios.forEach((r) => {
-        const radio = /** @type {HTMLInputElement} */ (r);
-        radio.checked = radio.value === state.theme;
-      });
-      // Accent color input.
-      const accentInput = /** @type {HTMLInputElement | null} */ (
-        panel.querySelector(`input[type="color"]#${tab}-accent`)
-      );
-      if (accentInput) {
-        accentInput.value = state.accent ? `#${state.accent}` : '#2962ff';
-      }
-      // Toggles.
-      const hideTitle = /** @type {HTMLInputElement | null} */ (
-        panel.querySelector(`#${tab}-hideTitle`)
-      );
-      if (hideTitle) hideTitle.checked = state.hideTitle;
-      const hideBrand = /** @type {HTMLInputElement | null} */ (
-        panel.querySelector(`#${tab}-hideBrand`)
-      );
-      if (hideBrand) hideBrand.checked = state.hideBrand;
+    const tab = target.kind;
+    // Theme radios.
+    const themeRadios = panel.querySelectorAll(
+      `input[type="radio"][name="${tab}-theme"]`,
+    );
+    themeRadios.forEach((r) => {
+      const radio = /** @type {HTMLInputElement} */ (r);
+      radio.checked = radio.value === state.theme;
+    });
+    // Accent color input.
+    const accentInput = /** @type {HTMLInputElement | null} */ (
+      panel.querySelector(`input[type="color"]#${tab}-accent`)
+    );
+    if (accentInput) {
+      accentInput.value = state.accent ? `#${state.accent}` : '#2962ff';
     }
+    // Toggles.
+    const hideTitle = /** @type {HTMLInputElement | null} */ (
+      panel.querySelector(`#${tab}-hideTitle`)
+    );
+    if (hideTitle) hideTitle.checked = state.hideTitle;
+    const hideBrand = /** @type {HTMLInputElement | null} */ (
+      panel.querySelector(`#${tab}-hideBrand`)
+    );
+    if (hideBrand) hideBrand.checked = state.hideBrand;
   }
 
   // ---------- Snippet panel ----------
@@ -439,17 +417,7 @@ export function mountIframeDemo(rootEl, target, appOrigin) {
 
   grid.append(previewCol, sideCol);
 
-  rootEl.append(tabsRow, grid);
-
-  // ---------- Wiring ----------
-  function syncTabUi() {
-    for (const tab of tabOrder) {
-      const isActive = tab === state.tab;
-      tabButtons[tab].classList.toggle('iframe-tab--active', isActive);
-      tabButtons[tab].setAttribute('aria-selected', String(isActive));
-      controlPanels[tab].hidden = !isActive;
-    }
-  }
+  rootEl.append(indicator, grid);
 
   function update() {
     const src = buildSrc(state, appOrigin, target);
@@ -457,7 +425,6 @@ export function mountIframeDemo(rootEl, target, appOrigin) {
     code.textContent = buildSnippet(src);
   }
 
-  syncTabUi();
   update();
 }
 
