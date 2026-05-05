@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>REST API demo — Polst embedding</title>
     <link rel="stylesheet" href="../assets/chrome.css" />
+    <link rel="stylesheet" href="api.css" />
     <style>
       :root {
         --bg: #fafafa;
@@ -29,7 +30,7 @@
         line-height: 1.5;
       }
       .demo-wrap {
-        max-width: 720px;
+        max-width: 1120px;
         margin: 0 auto;
         padding: 32px 24px 96px;
       }
@@ -44,6 +45,11 @@
         display: block;
         margin-bottom: 12px;
       }
+      .demo-wrap p.lede {
+        margin: 0 0 24px;
+        color: var(--muted);
+        max-width: 640px;
+      }
     </style>
   </head>
   <body>
@@ -51,11 +57,25 @@
     <div class="demo-wrap">
       <span class="icon" aria-hidden="true">🔌</span>
       <h1>REST API</h1>
+      <p class="lede">
+        Pure <code>fetch()</code> against <code>/api/rest/v1</code>. Each
+        card below is a request you could paste into your own app — no
+        SDK, no client lib, just the public REST surface. Hit
+        <strong>Run</strong> to fire the request against the active
+        env.
+      </p>
       <main id="demo"></main>
     </div>
     <script type="module">
       import { bootstrap } from '../assets/chrome-render.js';
+      import { init } from './api.js';
       bootstrap({ sourcePath: 'docs/api/index.html' });
+      // Defer init until the chrome has mounted (matches sdk/index.html).
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init, { once: true });
+      } else {
+        init();
+      }
     </script>
   </body>
 </html>

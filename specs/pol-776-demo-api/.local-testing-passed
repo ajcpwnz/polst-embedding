@@ -1,0 +1,23 @@
+# POL-776 — Local Testing Marker
+
+Verified 2026-05-05.
+
+What was verified:
+
+1. `node --check docs/api/api.js` — parses cleanly.
+2. `python3 -m http.server 8765 --directory docs` — index.html, api.js,
+   api.css and the shared chrome.js all served HTTP 200.
+3. Manual snippet shape verification (GET + POST vote) — output
+   exactly matches spec § "Snippet" example. Active env's apiOrigin
+   inlined literally; persisted X-Device-Id literally embedded in the
+   POST snippet header. No `<apiOrigin>` placeholders, no JS
+   template-literal expressions left over.
+4. Structural review of index.html — chrome shell mirrors
+   docs/sdk/index.html: `<div id="chrome">` + `<main id="demo">`,
+   inline module imports `bootstrap()` and `init()`, init defers to
+   DOMContentLoaded.
+
+Live env Run-button behaviour cannot be exercised from a local static
+server because the demo points at canary/staging/prod which are
+configured for the GH Pages-hosted demo origin. That validation
+happens in the deployed env after merge.
