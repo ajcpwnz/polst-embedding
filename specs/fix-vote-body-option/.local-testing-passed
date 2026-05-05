@@ -1,0 +1,14 @@
+Local stack testing passed for fix-vote-body-option (2026-05-05).
+
+Method: served docs/ via `python3 -m http.server 8765` from the worktree
+and exercised the API demo against staging via Chrome DevTools MCP.
+
+- Loaded http://localhost:8765/api/?polst=hKo9t3ycnf&env=staging
+- Verified vote variant snippet now shows `body: "{\"option\":\"A\"}"`
+  (was `{\"choice\":\"A\"}` before this fix).
+- Clicked Run on the vote variant.
+- Result: HTTP 200 OK in 1025ms with body
+  `{"data":{"tallies":{"optionA":1,"optionB":1,"total":2},"isRevote":false,"votedAt":"2026-05-05T10:33:09.616Z"}}`
+- This also confirms POL-768 (idempotency-key optional) is live on staging:
+  the request carried no `X-Polst-Idempotency-Key` header and the keyless
+  surface accepted it.
