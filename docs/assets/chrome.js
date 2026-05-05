@@ -9,19 +9,21 @@
 //
 // No DOM access lives in this file. The mounting code lives in
 // `chrome-render.js`. Vanilla ESM. No runtime deps.
+//
+// The accepted URL shapes and the short-id contract mirror what the
+// polst app actually serves — see `apps/frontend/src/utils/polstUrl.ts`
+// (canonical share URL is `/{category}/{slug}`; legacy fallback is
+// `/p/<shortId-or-slug>`) and `apps/backend/src/utils/shortId.ts`
+// (10-char `nanoid()`, URL-safe alphabet `A-Za-z0-9_-`).
 
-/** @typedef {'dev' | 'canary' | 'staging' | 'prod'} Env */
+/** @typedef {'canary' | 'staging' | 'prod'} Env */
 /** @typedef {{ kind: 'polst' | 'brand' | 'campaign', id: string }} PolstTarget */
 
 /** @type {ReadonlyArray<Env>} */
-export const ENVS = Object.freeze(['dev', 'canary', 'staging', 'prod']);
+export const ENVS = Object.freeze(['canary', 'staging', 'prod']);
 
 /** @type {Record<Env, { app: string, api: string }>} */
 const ORIGINS = Object.freeze({
-  dev: {
-    app: 'http://localhost:3000',
-    api: 'http://localhost:8000',
-  },
   canary: {
     app: 'https://canary.polst.app',
     api: 'https://canary-api.polst.app',
@@ -36,8 +38,34 @@ const ORIGINS = Object.freeze({
   },
 });
 
-const RAW_ID_RE = /^[A-Za-z0-9]{12}$/;
-const PATH_RE = /^\/([pbc])\/([^/?#]+)\/?$/;
+// Backend mints `nanoid(10)` shortIds — URL-safe alphabet includes `_-`.
+const RAW_ID_RE = /^[A-Za-z0-9_-]{10}$/;
+
+// Top-level path segments that are NOT polst share URLs. A polst's
+// canonical share URL is `/<category-slug>/<polst-slug>`, but other
+// 2-segment routes (auth, user pages, etc.) must not be misparsed as
+// polsts. Keep this list aligned with `apps/frontend/src/app/*` route
+// dirs whose first segment is reserved.
+const RESERVED_TOP_SEGMENTS = new Set([
+  'api',
+  'auth',
+  'brand',
+  'campaign',
+  'embed',
+  'explore',
+  'following',
+  'live',
+  'location',
+  'login',
+  'logout',
+  'nearby',
+  'p',
+  'register',
+  'search',
+  'sso',
+  'trending',
+  'u',
+]);
 
 /**
  * @param {string} hostname
@@ -46,7 +74,6 @@ const PATH_RE = /^\/([pbc])\/([^/?#]+)\/?$/;
 function envFromHostname(hostname) {
   if (!hostname) return null;
   const h = hostname.toLowerCase();
-  if (h === 'localhost' || h === '127.0.0.1' || h === '0.0.0.0') return 'dev';
   if (h === 'canary.polst.app') return 'canary';
   if (h === 'staging.polst.app') return 'staging';
   if (h === 'polst.app' || h === 'www.polst.app') return 'prod';
@@ -54,19 +81,25 @@ function envFromHostname(hostname) {
 }
 
 /**
- * @param {string} kindChar - 'p' | 'b' | 'c'
- * @returns {PolstTarget['kind'] | null}
+ * Split a URL pathname into non-empty segments.
+ *
+ * @param {string} pathname
+ * @returns {string[]}
  */
-function kindFromChar(kindChar) {
-  if (kindChar === 'p') return 'polst';
-  if (kindChar === 'b') return 'brand';
-  if (kindChar === 'c') return 'campaign';
-  return null;
+function pathSegments(pathname) {
+  return pathname.split('/').filter(Boolean);
 }
 
 /**
  * Parse the raw `?polst=` value into a target plus an optionally
  * inferred env. Returns null when the input is unrecognized.
+ *
+ * Accepted shapes:
+ *   - `<10-char nanoid>`                          → polst (no env)
+ *   - `https://<env-host>/p/<id>`                  → polst (legacy)
+ *   - `https://<env-host>/brand/<id>`              → brand
+ *   - `https://<env-host>/campaign/<id>`           → campaign
+ *   - `https://<env-host>/<category>/<polst-slug>` → polst (canonical)
  *
  * @param {string | null | undefined} raw
  * @returns {{ target: PolstTarget, inferredEnv: Env | null } | null}
@@ -76,7 +109,7 @@ export function parsePolstParam(raw) {
   const value = String(raw).trim();
   if (value === '') return null;
 
-  // Raw 12-char alphanumeric (no protocol) — treat as polst short id.
+  // Bare nanoid — treat as polst short id.
   if (RAW_ID_RE.test(value)) {
     return { target: { kind: 'polst', id: value }, inferredEnv: null };
   }
@@ -89,13 +122,37 @@ export function parsePolstParam(raw) {
   }
 
   const inferredEnv = envFromHostname(url.hostname);
-  const match = PATH_RE.exec(url.pathname);
-  if (!match) return null;
-  const kind = kindFromChar(match[1]);
-  if (!kind) return null;
-  const id = decodeURIComponent(match[2]);
-  if (!id) return null;
-  return { target: { kind, id }, inferredEnv };
+  const segments = pathSegments(url.pathname);
+  if (segments.length === 0) return null;
+
+  const [head, second] = segments;
+
+  // Single-segment path is never a share URL.
+  if (segments.length === 1) return null;
+
+  // Reserved prefixes — explicit kinds.
+  if (head === 'p' && second) {
+    return { target: { kind: 'polst', id: decodeURIComponent(second) }, inferredEnv };
+  }
+  if (head === 'brand' && second) {
+    return { target: { kind: 'brand', id: decodeURIComponent(second) }, inferredEnv };
+  }
+  if (head === 'campaign' && second) {
+    return { target: { kind: 'campaign', id: decodeURIComponent(second) }, inferredEnv };
+  }
+
+  // Canonical polst share URL: `/<category>/<polst-slug>` — exactly two
+  // segments where the first is not a reserved top-level route. The
+  // backend's `polst.getById` resolves slugs natively, so we hand off
+  // the polst-slug as the id.
+  if (segments.length === 2 && !RESERVED_TOP_SEGMENTS.has(head) && second) {
+    return {
+      target: { kind: 'polst', id: decodeURIComponent(second) },
+      inferredEnv,
+    };
+  }
+
+  return null;
 }
 
 /**

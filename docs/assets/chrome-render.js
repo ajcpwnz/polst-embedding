@@ -117,8 +117,8 @@ export function renderChrome(containerEl, opts) {
       type: 'text',
       class: 'polst-chrome__input',
       name: 'polst',
-      placeholder: 'https://polst.app/p/<id>  or  12-char id',
-      'aria-label': 'Polst link or short id',
+      placeholder: 'Polst, brand, or campaign URL — or a 10-char short id',
+      'aria-label': 'Polst, brand, or campaign URL or short id',
       autocomplete: 'off',
       spellcheck: 'false',
     })
