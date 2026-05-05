@@ -1,0 +1,21 @@
+Local stack testing passed for sdk-demo-configure-origins (2026-05-05).
+
+Verified the fix end-to-end via Chrome DevTools MCP against staging:
+- Served docs/ via `python3 -m http.server 8765` from the worktree.
+- Loaded http://localhost:8765/sdk/?polst=hKo9t3ycnf&env=staging.
+- OUTPUT panel rendered the F1 polst card with both options
+  ("Max Verstappen", "Lando Norris") and Vote A / Vote B buttons.
+- data-polst-hydrated="1" set inside the mount slot's Shadow DOM
+  via the SDK's renderPolst path.
+
+Pre-fix (verified with the unmodified deploy at gh-pages):
+- Same URL → empty OUTPUT panel.
+- Network panel showed only OPTIONS to https://api.polst.app
+  (prod default) returning CORS 503. The render's REST origin came
+  from the widget global, which is bundled in a separate esm.sh
+  module realm from `@polst-web/sdk`'s configureOrigins re-export,
+  so writes to that global can't reach the render's REST client.
+
+Fix is a 4-line edit in docs/sdk/sdk.js: pass `apiOrigin` to each
+renderPolst / renderCampaign / renderBrandFeed call. No `--provenance`
+issue here; this is the polst-embedding repo, separate publish path.
