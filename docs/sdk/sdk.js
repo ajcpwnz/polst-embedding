@@ -57,7 +57,7 @@ renderCampaign(mountEl, { campaignId: campaign.id });`,
 
   brand:
 `const feed = await client.getBrandFeed("__ID__");
-renderBrandFeed(mountEl, { brandSlug: "__ID__", pageSize: feed.items.length });`,
+renderBrandFeed(mountEl, { brandSlug: "__ID__", pageSize: feed.length });`,
 });
 
 const SETUP_SNIPPET =
@@ -271,10 +271,14 @@ export function mountSdkDemo(rootEl, target) {
     if (target.kind === 'brand') {
       renderStatus(mountEl, 'Loading brand feed…');
       try {
+        // PolstClient.getBrandFeed returns a bare array — its
+        // BrandFeedDTO type alias extracts just the `data` field off
+        // the wire envelope (`{ data: T[], nextCursor }`), losing the
+        // cursor. So `feed.length` is the page size, no `.items`.
         const feed = await client.getBrandFeed(target.id);
         renderBrandFeed(mountEl, {
           brandSlug: target.id,
-          pageSize: feed.items.length,
+          pageSize: feed.length,
           apiOrigin,
         });
       } catch (err) {

@@ -1,0 +1,10 @@
+Local testing passed for fix-sdk-demo-feed-length (2026-05-05).
+
+One-line demo fix. node --check sdk.js passes.
+
+Verification: confirmed via Node smoke (cd /tmp/sdk-verify) that
+client.brands.feed("brand-new-brand") on @polst-web/sdk@0.7.3 against
+staging returns a bare array of 10 items. So `feed.length` is the
+correct way to get the count; `feed.items` is undefined.
+
+Snippet panel and live render call now agree on `feed.length`.
