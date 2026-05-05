@@ -272,11 +272,20 @@ export function mountSdkDemo(rootEl, target) {
     const tabSnippet = materialiseSnippet(SNIPPETS[activeTab], target.id);
     code.textContent = `${SETUP_SNIPPET}\n\n${tabSnippet}`;
 
+    // POL-788 follow-up: pass `apiOrigin` per-call to render helpers.
+    // The widget's render path otherwise reads its REST origin from a
+    // module-internal global that this realm cannot reliably write to
+    // — esm.sh serves `@polst-web/sdk` and `@polst-web/sdk/render`
+    // from separate bundle realms, so a `configureOrigins` call in
+    // one does not update the global the other reads. Per-call
+    // bypasses the global entirely.
+    const apiOrigin = getApiOrigin(getEnv());
+
     if (activeTab === 'polst') {
       renderStatus(mountEl, 'Loading polst…');
       try {
         const polst = await client.getPolst(target.id);
-        renderPolst(mountEl, { polstId: polst.shortId });
+        renderPolst(mountEl, { polstId: polst.shortId, apiOrigin });
       } catch (err) {
         renderError(mountEl, classifyError(err));
       }
@@ -287,7 +296,7 @@ export function mountSdkDemo(rootEl, target) {
       renderStatus(mountEl, 'Loading campaign…');
       try {
         const campaign = await client.getCampaign(target.id);
-        renderCampaign(mountEl, { campaignId: campaign.id });
+        renderCampaign(mountEl, { campaignId: campaign.id, apiOrigin });
       } catch (err) {
         renderError(mountEl, classifyError(err));
       }
@@ -301,6 +310,7 @@ export function mountSdkDemo(rootEl, target) {
         renderBrandFeed(mountEl, {
           brandSlug: target.id,
           pageSize: feed.items.length,
+          apiOrigin,
         });
       } catch (err) {
         renderError(mountEl, classifyError(err));
