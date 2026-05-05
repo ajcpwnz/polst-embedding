@@ -1,0 +1,24 @@
+Local stack testing passed for auto-detect-kind (2026-05-05).
+
+Cross-cutting refactor of all four demo pages: drop tab/variant
+picker UI, auto-detect kind from chrome's polst-link parser, render
+only the matching demo with a "Showing: <kind>" indicator at top.
+
+Verified locally via Chrome DevTools MCP against staging with a polst
+short-id (hKo9t3ycnf):
+- /sdk/   — "SHOWING Polst" + polst card + Vote A/B inline. No tabs.
+- /iframe/ — "SHOWING Polst" + iframe rendering polst, with polst-only
+            controls (theme, accent, hideTitle, hideBrand). No tabs.
+- /script/ — "SHOWING Polst" + Shadow DOM polst card via auto-hydrate.
+             No tabs.
+- /api/   — "SHOWING polst" + only the 3 polst variants (get / results
+            / vote). No greyed-out campaign or brand cards.
+
+Behavioural notes:
+- SDK demo's standalone Vote tab is gone — vote buttons are part of
+  the polst widget that renderPolst mounts.
+- Brand and campaign demos require pasting a brand or campaign link
+  respectively. Empty state stays for no-link.
+- iframe and script controls still cover all per-kind controls
+  (campaign autoAdvance, brand mode) — only the panel for the
+  active kind is built.

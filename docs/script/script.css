@@ -14,43 +14,29 @@
   gap: 16px;
 }
 
-/* ---------- Tabs ---------- */
-.script-tabs {
+/* ---------- Kind indicator ---------- */
+.script-kind {
   display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 12px;
   background: var(--chrome-bg);
   border: 1px solid var(--chrome-border);
   border-radius: 10px;
   align-self: flex-start;
-}
-
-.script-tab {
-  background: transparent;
-  color: var(--chrome-fg);
-  border: 1px solid transparent;
-  border-radius: 6px;
-  padding: 6px 14px;
-  font: inherit;
   font-size: 0.92rem;
-  cursor: pointer;
 }
 
-.script-tab:hover {
-  background: var(--chrome-input-bg);
+.script-kind__label {
+  color: var(--chrome-muted, #777);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.72rem;
 }
 
-.script-tab--active {
-  background: var(--chrome-accent);
-  color: #ffffff;
-  border-color: var(--chrome-accent);
-  cursor: default;
-}
-
-.script-tab--active:hover {
-  background: var(--chrome-accent);
-  filter: brightness(1.05);
+.script-kind__value {
+  color: var(--chrome-fg);
+  font-weight: 600;
 }
 
 /* ---------- Grid ---------- */

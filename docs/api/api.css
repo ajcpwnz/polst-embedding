@@ -16,6 +16,31 @@
   gap: 16px;
 }
 
+/* ---------- Kind indicator ---------- */
+.api-kind {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 12px;
+  background: var(--chrome-bg);
+  border: 1px solid var(--chrome-border);
+  border-radius: 10px;
+  align-self: flex-start;
+  font-size: 0.92rem;
+}
+
+.api-kind__label {
+  color: var(--chrome-muted, #777);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.72rem;
+}
+
+.api-kind__value {
+  color: var(--chrome-fg);
+  font-weight: 600;
+}
+
 /* ---------- Variant card ---------- */
 .api-card {
   background: var(--chrome-empty-bg);

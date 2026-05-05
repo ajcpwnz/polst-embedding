@@ -494,11 +494,43 @@ export function mountApiDemo(rootEl, target) {
 
   const apiOrigin = getApiOrigin(getEnv());
 
-  for (const variant of VARIANTS) {
+  // Auto-detect kind from the chrome's link parser; render only the
+  // variants whose `needs` matches the kind. No tab picker — the
+  // chrome bar is the single source of truth, and the relevant 1–3
+  // cards for the pasted kind are all that's shown. (Polst-link → 3
+  // polst variants. Brand-link → 2 brand variants. Campaign-link → 1
+  // campaign variant.) Replaces the previous "all 6 cards always
+  // shown, three greyed out" UX, which had two failure modes: clicks
+  // on grey cards looked like nothing happened, and the page was
+  // visually crowded with options that couldn't run for the link.
+  rootEl.append(renderKindIndicator(target.kind));
+
+  const variants = VARIANTS.filter((v) => v.needs === target.kind);
+  for (const variant of variants) {
     rootEl.append(renderCard(variant, target, apiOrigin));
   }
 
   rootEl.append(renderFooter(apiOrigin));
+}
+
+/**
+ * "Showing: <kind>" pill rendered above the variant cards so the
+ * visitor can see at a glance which kind their link was parsed as.
+ *
+ * @param {TargetKind} kind
+ * @returns {HTMLElement}
+ */
+function renderKindIndicator(kind) {
+  const wrap = document.createElement('div');
+  wrap.className = 'api-kind';
+  const label = document.createElement('span');
+  label.className = 'api-kind__label';
+  label.textContent = 'Showing';
+  const value = document.createElement('span');
+  value.className = 'api-kind__value';
+  value.textContent = NEEDS_LABEL[kind];
+  wrap.append(label, value);
+  return wrap;
 }
 
 /**
