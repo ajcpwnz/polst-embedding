@@ -89,7 +89,7 @@ const VARIANTS = Object.freeze([
     method: 'POST',
     pathTpl: '/api/rest/v1/polsts/{id}/votes',
     needs: 'polst',
-    body: { choice: 'A' },
+    body: { option: 'A' },
   },
   {
     key: 'brand',
