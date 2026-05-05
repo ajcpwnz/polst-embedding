@@ -1,0 +1,26 @@
+POL-774 — Local testing pass.
+
+Server: `python3 -m http.server 8765 --directory docs`
+Tested in claude-in-chrome browser MCP.
+
+Verified:
+- Page renders at http://localhost:8765/script/?env=staging&polst=...
+- Shared chrome mounts (env switcher, polst-link form, View source link).
+- Tabs row + two-column grid + control panel + snippet panel all present.
+- `window.Polst` v0.7.1 loads from unpkg.
+- `Polst.configure({ origins })` applies — REST fetch lands at
+  `https://staging-api.polst.app/api/rest/v1/polsts/<id>` (404 expected
+  for the synthetic id used in testing).
+- `<html data-polst-auto-observe>` set; the widget's MutationObserver
+  picks up each fresh marker `<div>` and stamps `data-polst-hydrated="1"`.
+- Toggling `hide-title` rebuilds the marker and updates the snippet to
+  include `data-hide-title` (bare attribute form). Tab switch from polst
+  → campaign rewires the marker to `<div data-polst-campaign>`.
+- Empty state renders when no `?polst=` is supplied.
+- No JS errors from the demo. The `[polst] failed to hydrate` warnings
+  are expected — they confirm the widget IS calling the configured API
+  (synthetic ids 404). They are caught inside the widget and never
+  re-thrown into the host.
+
+Skipped: lint and unit-test scripts — the polst-embedding repo's
+docs/ slice has neither.

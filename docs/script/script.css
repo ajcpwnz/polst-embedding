@@ -1,0 +1,292 @@
+/* docs/script/script.css
+ *
+ * POL-774 — page-specific layout for the script-tag (Shadow DOM widget)
+ * demo. Mirrors the iframe demo's structure (tabs, two-column grid,
+ * preview / controls / snippet) but uses `.script-*` class names so the
+ * two pages can diverge later without touching shared chrome CSS.
+ *
+ * Reuses --chrome-* variables from chrome.css for colour parity.
+ */
+
+.script-demo {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ---------- Tabs ---------- */
+.script-tabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  background: var(--chrome-bg);
+  border: 1px solid var(--chrome-border);
+  border-radius: 10px;
+  align-self: flex-start;
+}
+
+.script-tab {
+  background: transparent;
+  color: var(--chrome-fg);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font: inherit;
+  font-size: 0.92rem;
+  cursor: pointer;
+}
+
+.script-tab:hover {
+  background: var(--chrome-input-bg);
+}
+
+.script-tab--active {
+  background: var(--chrome-accent);
+  color: #ffffff;
+  border-color: var(--chrome-accent);
+  cursor: default;
+}
+
+.script-tab--active:hover {
+  background: var(--chrome-accent);
+  filter: brightness(1.05);
+}
+
+/* ---------- Grid ---------- */
+.script-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(280px, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 880px) {
+  .script-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Preview ---------- */
+.script-preview {
+  background: var(--chrome-empty-bg);
+  border: 1px solid var(--chrome-border);
+  border-radius: 12px;
+  padding: 16px;
+  min-height: 480px;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+/* The widget renders inside its own Shadow DOM, so we just give the
+ * mount slot enough room to show the widget at a sane width. */
+.script-preview__mount {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 448px;
+  display: flex;
+  align-items: stretch;
+}
+
+.script-preview__mount > [data-polst],
+.script-preview__mount > [data-polst-campaign],
+.script-preview__mount > [data-polst-brand] {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* ---------- Side column ---------- */
+.script-side {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+/* ---------- Controls ---------- */
+.script-controls {
+  background: var(--chrome-empty-bg);
+  border: 1px solid var(--chrome-border);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.script-controls[hidden] {
+  display: none;
+}
+
+.script-controls__heading {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--chrome-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.script-controls__common {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Radio group */
+.script-radio {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.script-radio legend {
+  color: var(--chrome-muted);
+  font-size: 0.85rem;
+  margin-right: 4px;
+  padding: 0;
+}
+
+.script-radio label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+/* Toggle */
+.script-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+/* Accent picker */
+.script-accent {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.script-accent label {
+  color: var(--chrome-muted);
+  font-size: 0.85rem;
+}
+
+.script-accent input[type="color"] {
+  width: 36px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--chrome-border);
+  border-radius: 6px;
+  background: var(--chrome-input-bg);
+  cursor: pointer;
+}
+
+.script-accent__clear {
+  background: transparent;
+  color: var(--chrome-muted);
+  border: 1px solid var(--chrome-border);
+  border-radius: 6px;
+  padding: 2px 8px;
+  font: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+
+.script-accent__clear:hover {
+  color: var(--chrome-fg);
+  border-color: var(--chrome-fg);
+}
+
+/* Select */
+.script-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.script-select label {
+  color: var(--chrome-muted);
+  font-size: 0.85rem;
+}
+
+.script-select select {
+  background: var(--chrome-input-bg);
+  color: var(--chrome-fg);
+  border: 1px solid var(--chrome-border);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font: inherit;
+}
+
+/* ---------- Snippet ---------- */
+.script-snippet {
+  background: var(--chrome-empty-bg);
+  border: 1px solid var(--chrome-border);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.script-snippet__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.script-snippet__header h2 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--chrome-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.script-snippet__copy {
+  background: var(--chrome-accent);
+  color: #ffffff;
+  border: 1px solid var(--chrome-accent);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.script-snippet__copy:hover {
+  filter: brightness(1.05);
+}
+
+.script-snippet__pre {
+  margin: 0;
+  padding: 12px;
+  background: var(--chrome-input-bg);
+  border: 1px solid var(--chrome-border);
+  border-radius: 8px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--chrome-fg);
+  white-space: pre;
+}
+
+.script-snippet__pre code {
+  font: inherit;
+  color: inherit;
+  background: none;
+}
