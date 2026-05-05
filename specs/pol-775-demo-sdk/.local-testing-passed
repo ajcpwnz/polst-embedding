@@ -1,0 +1,35 @@
+# POL-775 — Local Testing Marker
+
+Date: 2026-05-05
+
+## Verification performed
+
+1. `node --check docs/sdk/sdk.js` → PARSE OK.
+2. Static server smoke test:
+   - `python3 -m http.server 8765 --directory docs` (background)
+   - `GET /sdk/index.html` → 200
+   - `GET /sdk/sdk.js` → 200
+   - `GET /sdk/sdk.css` → 200
+   - `GET /assets/chrome.js` → 200
+   - `GET /assets/chrome.css` → 200
+3. SDK CDN reachability sanity:
+   - `GET https://esm.sh/@polst-web/sdk` → 200
+   - `GET https://esm.sh/@polst-web/sdk/render` → 200
+4. Visual / structural review of the new files against POL-774's
+   `docs/script/index.html` + `script.js` + `script.css` confirms the
+   shared-chrome consumption pattern, the tabs/grid layout, and the
+   snippet panel + Copy button match the just-merged sibling demo.
+
+## Limitations
+
+- No Chrome DevTools MCP / Playwright run was attempted from inside this
+  worker; the polst-embedding repo has no docker stack and no built-in
+  test harness for the docs/ surface, so verification is limited to
+  static-server smoke + parse + visual review per the chain prompt's
+  guidance.
+- End-to-end voting against canary/staging requires a live polst short
+  id supplied via `?polst=<id>` in the URL — not exercised here, but
+  the call site (`client.polsts.vote(target.id, choice)`) is byte-
+  identical to the displayed snippet, so any divergence between code-
+  block and execution would fail the spec's load-bearing constraint
+  loudly.

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>JS SDK demo — Polst embedding</title>
     <link rel="stylesheet" href="../assets/chrome.css" />
+    <link rel="stylesheet" href="sdk.css" />
     <style>
       :root {
         --bg: #fafafa;
@@ -29,7 +30,7 @@
         line-height: 1.5;
       }
       .demo-wrap {
-        max-width: 720px;
+        max-width: 1120px;
         margin: 0 auto;
         padding: 32px 24px 96px;
       }
@@ -44,6 +45,11 @@
         display: block;
         margin-bottom: 12px;
       }
+      .demo-wrap p.lede {
+        margin: 0 0 24px;
+        color: var(--muted);
+        max-width: 640px;
+      }
     </style>
   </head>
   <body>
@@ -51,11 +57,27 @@
     <div class="demo-wrap">
       <span class="icon" aria-hidden="true">🧩</span>
       <h1>JS SDK</h1>
+      <p class="lede">
+        Programmatic embedding via <code>@polst-web/sdk</code>. The
+        snippet on the left is the exact code an integrator would
+        write; it's also the exact code that runs to produce the
+        output on the right.
+      </p>
       <main id="demo"></main>
     </div>
     <script type="module">
       import { bootstrap } from '../assets/chrome-render.js';
+      import { init } from './sdk.js';
       bootstrap({ sourcePath: 'docs/sdk/index.html' });
+      // bootstrap() defers chrome render until DOMContentLoaded if the
+      // document is still loading; we mirror that for init() so the
+      // demo mount runs after the chrome bar (and any empty state) is
+      // in place.
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init, { once: true });
+      } else {
+        init();
+      }
     </script>
   </body>
 </html>
