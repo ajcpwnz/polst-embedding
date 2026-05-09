@@ -8,11 +8,16 @@
 //   - Provide `getPolstTarget()` / `getEnv()` to consumers.
 //   - Provide `getApiOrigin(env)` / `getAppOrigin(env)` for backends.
 //   - Health banner helpers (`pingHealth`, `installHealthBanner`).
+//   - Copy + Prism helpers (`installCopyHandlers`,
+//     `installPrismHighlighting`) for the per-demo "ready to paste"
+//     code blocks. Both ship in clearly-fenced sections at the bottom
+//     of this file.
 //
 // The bulk of DOM mounting still lives in `chrome-render.js`. Small
-// self-contained mount helpers (the "Health banner" section below,
-// future copy handlers, etc.) live here so they can be wired in by
-// `bootstrap()` without per-page changes. Vanilla ESM. No runtime deps.
+// self-contained mount helpers (the "Health banner" and
+// "Copy handlers + Prism" sections below) live here so they can be
+// wired in by `bootstrap()` without per-page changes. Vanilla ESM. No
+// runtime deps.
 //
 // The accepted URL shapes and the short-id contract mirror what the
 // polst app actually serves — see `apps/frontend/src/utils/polstUrl.ts`
@@ -406,4 +411,144 @@ export function installHealthBanner(containerEl, opts) {
   };
   /** @type {any} */ (containerEl)._polstHealthTeardown = teardown;
   return teardown;
+}
+
+// --------------------------------------------------------------------
+// Copy handlers + Prism highlighting
+// --------------------------------------------------------------------
+//
+// `installCopyHandlers(rootEl?)` scans `rootEl` (default `document`)
+// for `<button data-copy-target="#snippet-id">` elements and wires
+// them to `navigator.clipboard.writeText`. After a successful copy the
+// button label flips to "Copied!" for 2s, then reverts. Idempotent —
+// each button is tagged with `data-copy-wired="1"` so a second call
+// on an already-wired button is a no-op.
+//
+// `installPrismHighlighting()` lazily injects the Prism cdnjs CSS +
+// core JS bundle plus the language addons we use (swift, kotlin,
+// bash, json — html and javascript ship in core). Idempotent via a
+// `[data-prism="core"]` sentinel on the injected `<script>`. Once the
+// core script loads, `Prism.highlightAll()` runs to apply syntax
+// highlighting to every `<pre><code class="language-...">` block on
+// the page.
+//
+// Both helpers are wired in `bootstrap()` (`chrome-render.js`) so
+// they fire on every demo page without per-page imports. Pages with
+// no copy buttons or no `language-*` blocks see a no-op from each
+// helper (the buttons query just returns 0, and Prism ignores blocks
+// that lack the `language-*` class).
+
+const COPY_FEEDBACK_MS = 2000;
+
+const PRISM_BASE = 'https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0';
+const PRISM_LANG_ADDONS = Object.freeze(['swift', 'kotlin', 'bash', 'json']);
+
+/**
+ * Wire every `<button data-copy-target="#id">` inside `rootEl` to
+ * `navigator.clipboard.writeText`. The selector value is resolved with
+ * `document.querySelector` (so cross-document selectors are not
+ * supported, but standard CSS `#id` and `.class` selectors are).
+ *
+ * @param {ParentNode | null} [rootEl] - defaults to `document`.
+ * @returns {void}
+ */
+export function installCopyHandlers(rootEl) {
+  /** @type {ParentNode | null} */
+  const root = rootEl || (typeof document !== 'undefined' ? document : null);
+  if (!root) return;
+
+  const buttons = root.querySelectorAll('button[data-copy-target]');
+  buttons.forEach((node) => {
+    const btn = /** @type {HTMLButtonElement} */ (node);
+    if (btn.getAttribute('data-copy-wired') === '1') return;
+    btn.setAttribute('data-copy-wired', '1');
+    if (!btn.hasAttribute('aria-live')) {
+      btn.setAttribute('aria-live', 'polite');
+    }
+    const originalLabel = btn.textContent || 'Copy';
+
+    btn.addEventListener('click', async () => {
+      const selector = btn.getAttribute('data-copy-target');
+      if (!selector) return;
+      let target;
+      try {
+        target = document.querySelector(selector);
+      } catch {
+        // Bad selector — silently no-op.
+        return;
+      }
+      if (!target) return;
+      const text = target.textContent || '';
+      try {
+        if (
+          typeof navigator !== 'undefined' &&
+          navigator.clipboard &&
+          typeof navigator.clipboard.writeText === 'function'
+        ) {
+          await navigator.clipboard.writeText(text);
+          btn.textContent = 'Copied!';
+          btn.classList.add('is-copied');
+          window.setTimeout(() => {
+            btn.textContent = originalLabel;
+            btn.classList.remove('is-copied');
+          }, COPY_FEEDBACK_MS);
+        }
+      } catch {
+        // Clipboard rejection (insecure context, permissions, etc.) —
+        // leave the label unchanged. The demo audience runs on HTTPS
+        // (GitHub Pages) or localhost, both secure contexts, so this
+        // is purely defensive.
+      }
+    });
+  });
+}
+
+/**
+ * Lazily inject the Prism cdnjs CSS link + core JS + language addons
+ * into `<head>`. Idempotent via a `script[data-prism="core"]` sentinel
+ * — calling this helper twice in the same document is a no-op on the
+ * second call.
+ *
+ * Once the core script load fires, `Prism.highlightAll()` runs on the
+ * next tick so the addon scripts have a chance to register their
+ * grammars first (cdnjs serves the addons with `defer`, so they
+ * load in parallel with core but execute in document order).
+ *
+ * @returns {void}
+ */
+export function installPrismHighlighting() {
+  if (typeof document === 'undefined' || !document.head) return;
+  if (document.head.querySelector('script[data-prism="core"]')) return;
+
+  const css = document.createElement('link');
+  css.rel = 'stylesheet';
+  css.href = `${PRISM_BASE}/themes/prism.min.css`;
+  css.setAttribute('data-prism', 'css');
+  document.head.appendChild(css);
+
+  const core = document.createElement('script');
+  core.src = `${PRISM_BASE}/prism.min.js`;
+  core.defer = true;
+  core.setAttribute('data-prism', 'core');
+  core.addEventListener('load', () => {
+    window.setTimeout(() => {
+      const Prism = /** @type {any} */ (window).Prism;
+      if (Prism && typeof Prism.highlightAll === 'function') {
+        try {
+          Prism.highlightAll();
+        } catch {
+          /* no-op — bad grammar should not break the page */
+        }
+      }
+    }, 0);
+  });
+  document.head.appendChild(core);
+
+  for (const lang of PRISM_LANG_ADDONS) {
+    const s = document.createElement('script');
+    s.src = `${PRISM_BASE}/components/prism-${lang}.min.js`;
+    s.defer = true;
+    s.setAttribute('data-prism', `lang-${lang}`);
+    document.head.appendChild(s);
+  }
 }

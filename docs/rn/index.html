@@ -38,11 +38,43 @@
         margin: 0 0 8px;
         letter-spacing: -0.02em;
       }
+      .demo-wrap h2 {
+        font-size: 1.15rem;
+        margin: 32px 0 12px;
+        letter-spacing: -0.01em;
+      }
       .demo-wrap .icon {
         font-size: 2rem;
         line-height: 1;
         display: block;
         margin-bottom: 12px;
+      }
+      .demo-wrap p.lede {
+        margin: 0 0 8px;
+        color: var(--muted);
+        max-width: 640px;
+      }
+      .demo-wrap code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.9em;
+        padding: 1px 5px;
+        border-radius: 4px;
+        background: color-mix(in srgb, var(--fg) 8%, transparent);
+      }
+      pre {
+        overflow-x: auto;
+        margin: 12px 0 0;
+        padding: 16px;
+        border-radius: 8px;
+        background: color-mix(in srgb, var(--fg) 6%, transparent);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.875rem;
+        line-height: 1.5;
+      }
+      pre code {
+        background: transparent;
+        padding: 0;
+        font-size: inherit;
       }
     </style>
   </head>
@@ -51,7 +83,47 @@
     <div class="demo-wrap">
       <span class="icon" aria-hidden="true">⚛️</span>
       <h1>React Native</h1>
-      <main id="demo"></main>
+      <p class="lede">
+        Embed Polst in a React Native app via the
+        <code>react-native-web</code> bridge — the same
+        <code>@polst-web/sdk</code> renderer the web SDK demo uses
+        also drives the RN web build, so a single component declaration
+        covers both surfaces.
+      </p>
+      <main id="demo">
+        <section class="rn-snippet">
+          <h2>Minimal RN integration</h2>
+          <p>
+            Drop the SDK import + a single <code>PolstView</code> JSX
+            element into any screen. On RN-web the renderer hydrates
+            against the same REST surface the JS SDK demo uses; on
+            native RN, swap to the upstream
+            <code>@polst-web/react-native</code> entry point (same
+            props, same env selection).
+          </p>
+          <div class="snippet-block">
+            <div class="snippet-block__header">
+              <h3>Copy this snippet</h3>
+              <button
+                class="copy-button"
+                type="button"
+                data-copy-target="#snippet-rn-import"
+              >Copy</button>
+            </div>
+            <pre><code id="snippet-rn-import" class="language-javascript">import React from 'react';
+import { PolstView } from '@polst-web/sdk/react';
+
+export function PolstScreen() {
+  return (
+    &lt;PolstView
+      shortId="abc123XYZ_"
+      apiOrigin="https://api.polst.app"
+    /&gt;
+  );
+}</code></pre>
+          </div>
+        </section>
+      </main>
     </div>
     <script type="module">
       import { bootstrap } from '../assets/chrome-render.js';

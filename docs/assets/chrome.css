@@ -259,3 +259,58 @@
     box-shadow: 0 0 0 2px color-mix(in srgb, #f87171 25%, transparent);
   }
 }
+
+/* Copy button + snippet block — paired markup pattern used by the
+ * per-demo "ready to paste" code blocks on ios / android / rn. The
+ * shared `installCopyHandlers()` (chrome.js) wires the button to
+ * `navigator.clipboard.writeText(<code-target>.textContent)` and
+ * toggles the `is-copied` class for 2s after a successful copy. */
+.snippet-block {
+  margin: 12px 0 0;
+}
+
+.snippet-block__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 0 0 6px;
+}
+
+.snippet-block__header h3,
+.snippet-block__header h2 {
+  margin: 0;
+  font-size: 1rem;
+  letter-spacing: -0.01em;
+}
+
+.copy-button {
+  font: inherit;
+  font-size: 0.78rem;
+  line-height: 1.2;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--chrome-border);
+  background: var(--chrome-input-bg);
+  color: var(--chrome-fg);
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease,
+    border-color 120ms ease;
+}
+
+.copy-button:hover {
+  border-color: var(--chrome-accent);
+  color: var(--chrome-accent);
+}
+
+.copy-button:focus-visible {
+  outline: 2px solid var(--chrome-accent);
+  outline-offset: 1px;
+}
+
+.copy-button.is-copied {
+  background: var(--chrome-accent);
+  color: #ffffff;
+  border-color: var(--chrome-accent);
+}
