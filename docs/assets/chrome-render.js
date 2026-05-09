@@ -9,7 +9,9 @@ import {
   ENVS,
   getEnv,
   getPolstTarget,
+  installCopyHandlers,
   installHealthBanner,
+  installPrismHighlighting,
 } from './chrome.js';
 
 const SOURCE_BASE =
@@ -225,10 +227,18 @@ function ensureHealthMount(chromeEl) {
  * minimize boilerplate.
  *
  * Also injects a health banner above the chrome shell unless
- * `opts.skipHealthBanner` is set. Per-page HTML doesn't need to change
- * — `bootstrap()` creates `<div id="chrome-health">` on demand.
+ * `opts.skipHealthBanner` is set, runs Prism syntax highlighting
+ * unless `opts.skipPrism` is set, and wires any
+ * `<button data-copy-target>` buttons unless `opts.skipCopyHandlers`
+ * is set. Per-page HTML doesn't need to change — `bootstrap()` creates
+ * `<div id="chrome-health">` on demand.
  *
- * @param {{ sourcePath: string, skipHealthBanner?: boolean }} opts
+ * @param {{
+ *   sourcePath: string,
+ *   skipHealthBanner?: boolean,
+ *   skipPrism?: boolean,
+ *   skipCopyHandlers?: boolean,
+ * }} opts
  */
 export function bootstrap(opts) {
   const run = () => {
@@ -240,6 +250,8 @@ export function bootstrap(opts) {
     }
     if (chromeEl) renderChrome(chromeEl, opts);
     if (demoEl && !getPolstTarget()) renderEmptyState(demoEl);
+    if (!opts || !opts.skipPrism) installPrismHighlighting();
+    if (!opts || !opts.skipCopyHandlers) installCopyHandlers();
   };
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', run, { once: true });

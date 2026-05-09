@@ -251,7 +251,16 @@
             once at app startup, then drop a <code>PolstView</code>
             anywhere in your Compose tree.
           </p>
-          <pre><code class="language-kotlin">import android.os.Bundle
+          <div class="snippet-block">
+            <div class="snippet-block__header">
+              <h3>Copy this snippet</h3>
+              <button
+                class="copy-button"
+                type="button"
+                data-copy-target="#snippet-android-compose"
+              >Copy</button>
+            </div>
+            <pre><code id="snippet-android-compose" class="language-kotlin">import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.padding
@@ -280,6 +289,7 @@ class MainActivity : ComponentActivity() {
     }
   }
 }</code></pre>
+          </div>
           <p>
             Replace <code>"abc123XYZ_"</code> with any real 10-char
             Polst short id. The snippet is shape-only; copy-paste it
