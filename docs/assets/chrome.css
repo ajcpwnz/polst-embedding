@@ -173,3 +173,89 @@
 .polst-empty a:hover {
   text-decoration: underline;
 }
+
+/* Health banner — sits above .polst-chrome on every demo page.
+ * Mounted by `installHealthBanner()` (chrome.js) via `bootstrap()`
+ * (chrome-render.js). No per-page HTML changes required. */
+.chrome-health-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 6px 20px;
+  background: var(--chrome-bg);
+  color: var(--chrome-muted);
+  border-bottom: 1px solid var(--chrome-border);
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Oxygen,
+    Ubuntu,
+    Cantarell,
+    "Helvetica Neue",
+    Arial,
+    sans-serif;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+}
+
+.chrome-health-banner__env {
+  color: var(--chrome-fg);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+}
+
+.chrome-health-banner__sep {
+  color: var(--chrome-border);
+}
+
+.chrome-health-banner__host {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color: var(--chrome-muted);
+}
+
+.chrome-health-banner__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chrome-health-banner__label {
+  color: var(--chrome-muted);
+}
+
+.chrome-health-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--chrome-border);
+  flex: 0 0 auto;
+}
+
+.chrome-health-dot.is-healthy {
+  background: #1f9d55;
+  box-shadow: 0 0 0 2px color-mix(in srgb, #1f9d55 25%, transparent);
+}
+
+.chrome-health-dot.is-down {
+  background: #d23535;
+  box-shadow: 0 0 0 2px color-mix(in srgb, #d23535 25%, transparent);
+}
+
+@media (prefers-color-scheme: dark) {
+  .chrome-health-dot.is-healthy {
+    background: #4ade80;
+    box-shadow: 0 0 0 2px color-mix(in srgb, #4ade80 25%, transparent);
+  }
+
+  .chrome-health-dot.is-down {
+    background: #f87171;
+    box-shadow: 0 0 0 2px color-mix(in srgb, #f87171 25%, transparent);
+  }
+}
