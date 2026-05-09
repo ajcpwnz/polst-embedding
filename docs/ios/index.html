@@ -29,7 +29,7 @@
         line-height: 1.5;
       }
       .demo-wrap {
-        max-width: 720px;
+        max-width: 880px;
         margin: 0 auto;
         padding: 32px 24px 96px;
       }
@@ -38,11 +38,87 @@
         margin: 0 0 8px;
         letter-spacing: -0.02em;
       }
+      .demo-wrap h2 {
+        font-size: 1.15rem;
+        margin: 32px 0 12px;
+        letter-spacing: -0.01em;
+      }
       .demo-wrap .icon {
         font-size: 2rem;
         line-height: 1;
         display: block;
         margin-bottom: 12px;
+      }
+      .demo-wrap p.lede {
+        margin: 0 0 8px;
+        color: var(--muted);
+        max-width: 640px;
+      }
+      .demo-wrap ul,
+      .demo-wrap ol {
+        padding-left: 1.25rem;
+      }
+      .demo-wrap li {
+        margin-bottom: 6px;
+      }
+      .demo-wrap code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.9em;
+        padding: 1px 5px;
+        border-radius: 4px;
+        background: color-mix(in srgb, var(--fg) 8%, transparent);
+      }
+      .ios-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 16px;
+        margin: 0;
+      }
+      .ios-grid figure {
+        margin: 0;
+        padding: 8px;
+        border: 1px solid color-mix(in srgb, var(--fg) 12%, transparent);
+        border-radius: 8px;
+        background: color-mix(in srgb, var(--fg) 3%, transparent);
+      }
+      .ios-grid img {
+        width: 100%;
+        aspect-ratio: 16 / 10;
+        object-fit: cover;
+        display: block;
+        border-radius: 4px;
+        background: color-mix(in srgb, var(--fg) 10%, transparent);
+      }
+      .ios-grid figcaption {
+        margin-top: 8px;
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+      .ios-callout {
+        margin: 24px 0 0;
+        padding: 12px 16px;
+        border-left: 3px solid var(--muted);
+        background: color-mix(in srgb, var(--fg) 5%, transparent);
+        border-radius: 0 6px 6px 0;
+        color: var(--fg);
+      }
+      .ios-callout p {
+        margin: 0;
+      }
+      pre {
+        overflow-x: auto;
+        margin: 12px 0 0;
+        padding: 16px;
+        border-radius: 8px;
+        background: color-mix(in srgb, var(--fg) 6%, transparent);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.875rem;
+        line-height: 1.5;
+      }
+      pre code {
+        background: transparent;
+        padding: 0;
+        font-size: inherit;
       }
     </style>
   </head>
@@ -51,7 +127,161 @@
     <div class="demo-wrap">
       <span class="icon" aria-hidden="true">🍎</span>
       <h1>iOS SDK</h1>
-      <main id="demo"></main>
+      <p class="lede">
+        Embed Polst inside an iOS app with first-class SwiftUI and
+        UIKit support, native rendering, and an offline-friendly
+        vote replay queue. This page is informational — there's no
+        live render here, because native iOS code can't run in a
+        browser. Clone the sandbox app to try it on a simulator or
+        device.
+      </p>
+      <main id="demo">
+        <section class="ios-features">
+          <h2>What you get</h2>
+          <ul>
+            <li>
+              First-class <strong>SwiftUI</strong> support via the
+              <code>PolstView</code> view, plus a
+              <strong>UIKit</strong> <code>PolstViewController</code>
+              for legacy view-controller-based screens.
+            </li>
+            <li>
+              <strong>Native rendering</strong> — no
+              <code>WKWebView</code>, no JS bridge. The widget draws
+              with the host app's SwiftUI / UIKit stack.
+            </li>
+            <li>
+              <strong>Offline cache</strong> — last-fetched polst
+              payloads are persisted so the widget renders even when
+              the device is offline.
+            </li>
+            <li>
+              <strong>Vote replay queue</strong> — votes cast offline
+              are queued locally and replayed once connectivity
+              returns.
+            </li>
+            <li>
+              Encrypted device-id and token storage via the iOS
+              <strong>Keychain</strong>.
+            </li>
+            <li>
+              Environment selection at SDK init via
+              <code>PolstClient(environment: .production)</code>
+              (or <code>.staging</code> / <code>.dev</code> /
+              <code>.custom</code>) — passed into each render surface.
+            </li>
+          </ul>
+        </section>
+
+        <section class="ios-shots">
+          <h2>Screenshots</h2>
+          <div class="ios-grid">
+            <figure>
+              <img
+                src="../assets/ios/swiftui-single.png"
+                alt="A single Polst rendered with the SwiftUI PolstView in the sandbox app on the iOS Simulator."
+              />
+              <figcaption>
+                Single Polst rendered via the SwiftUI
+                <code>PolstView</code>.
+              </figcaption>
+            </figure>
+            <figure>
+              <img
+                src="../assets/ios/uikit-view.png"
+                alt="The same Polst rendered with the UIKit PolstViewController surface in the sandbox app."
+              />
+              <figcaption>
+                Same Polst rendered via the UIKit
+                <code>PolstViewController</code> surface for
+                legacy screens.
+              </figcaption>
+            </figure>
+            <figure>
+              <img
+                src="../assets/ios/offline-replay.png"
+                alt="The offline replay queue flushing a queued vote once connectivity returns."
+              />
+              <figcaption>
+                Offline replay queue flushing once connectivity
+                returns.
+              </figcaption>
+            </figure>
+          </div>
+        </section>
+
+        <section class="ios-tryit">
+          <h2>Try it locally</h2>
+          <ol>
+            <li>
+              Clone the embedding repo:
+              <code>git clone git@github.com:ajcpwnz/polst-embedding.git</code>.
+            </li>
+            <li>
+              Open the sandbox in <strong>Xcode</strong>:
+              <code>open ios/PolstSDKSandbox.xcodeproj</code>, select
+              the <code>PolstSDKSandbox</code> scheme, pick an iOS
+              Simulator, and press <code>Cmd+R</code>.
+            </li>
+            <li>
+              Follow
+              <a href="../../ios/README.md"><code>ios/README.md</code></a>
+              for sandbox-specific run notes (Swift Package
+              resolution, command-line build).
+            </li>
+            <li>
+              For SDK source, issues, and releases, see the upstream
+              <a href="https://github.com/ajcpwnz/polst-ios"><code>polst-ios</code></a>
+              repo.
+            </li>
+          </ol>
+        </section>
+
+        <aside class="ios-callout">
+          <p>
+            <strong>Upstream Swift package.</strong>
+            The sandbox depends on the upstream
+            <a href="https://github.com/ajcpwnz/polst-ios"><code>polst-ios</code></a>
+            SDK (<code>git@github.com:ajcpwnz/polst-ios.git</code>),
+            resolved through Xcode's Swift Package Manager. Bug fixes
+            and feature work should go upstream first; the sandbox
+            tracks tagged releases.
+          </p>
+        </aside>
+
+        <section class="ios-snippet">
+          <h2>Minimal SwiftUI integration</h2>
+          <p>
+            The canonical "render a polst" call. Construct a
+            <code>PolstClient</code> once at app startup, then drop a
+            <code>PolstView</code> anywhere in your SwiftUI scene.
+          </p>
+          <pre><code class="language-swift">import PolstSDK
+import SwiftUI
+
+// One-time at app startup — pick the env you need.
+private let polstClient = PolstClient(environment: .production)
+
+@main
+struct MyApp: App {
+  var body: some Scene {
+    WindowGroup {
+      PolstView(shortId: "abc123XYZ_", client: polstClient)
+    }
+  }
+}</code></pre>
+          <p>
+            Replace <code>"abc123XYZ_"</code> with any real 10-char
+            Polst short id. The snippet is shape-only; copy-paste it
+            into a SwiftUI app to render a single polst end-to-end.
+            For UIKit hosts, swap <code>PolstView</code> for
+            <code>PolstViewController(shortId:, client:)</code> and
+            embed it as a child view controller (see
+            <a href="../../ios/README.md"><code>ios/README.md</code></a>
+            and the sandbox's <code>UIKitPolstHost</code>).
+          </p>
+        </section>
+      </main>
     </div>
     <script type="module">
       import { bootstrap } from '../assets/chrome-render.js';
