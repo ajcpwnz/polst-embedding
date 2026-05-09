@@ -17,8 +17,10 @@ red.
 
 ## Scope
 
-- `.github/workflows/smoke.yml` — new GHA workflow, `cron` daily plus
-  `push` to `master`, plus `workflow_dispatch`.
+- `.github/workflows/smoke.yml` — new GHA workflow, triggered on
+  `push` to `master` and `workflow_dispatch`. (Ticket initially
+  proposed a daily cron; dropped per project-owner decision in favor
+  of on-demand + post-master-merge runs.)
 - `tests/smoke/package.json` — Node project pinning Playwright. Only
   Chromium installed.
 - `tests/smoke/playwright.config.ts` — Playwright config, `retries: 2`,
@@ -123,8 +125,8 @@ reset each retry.
 
 ## Acceptance
 
-- Daily smoke run (`schedule: "0 12 * * *"`) completes in under
-  2 minutes.
+- Smoke run (push to `master` or manual `workflow_dispatch`) completes
+  in under 2 minutes.
 - A real staging regression that breaks an embed mode shows red in the
   Actions UI.
 - Transient 5xx is absorbed by `retries: 2`.

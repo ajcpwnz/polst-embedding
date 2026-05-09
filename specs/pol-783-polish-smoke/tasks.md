@@ -15,8 +15,8 @@
      `test-results/`.
    - `README.md` — three-line "how to run locally" pointer.
 2. Create `.github/workflows/smoke.yml`:
-   - Triggers: `schedule` (daily 12:00 UTC), `push` to `master`,
-     `workflow_dispatch` with optional `shortId` input.
+   - Triggers: `push` to `master`, `workflow_dispatch` with optional
+     `shortId` input. (No `schedule` — owner declined daily cron.)
    - Single `smoke` job on `ubuntu-latest`.
    - Steps: checkout → `actions/setup-node@v4` (node 22) →
      `npm ci` in `tests/smoke` → `npx playwright install --with-deps

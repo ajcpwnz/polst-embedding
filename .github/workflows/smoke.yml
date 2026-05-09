@@ -1,18 +1,18 @@
 name: Smoke (Playwright)
 
-# Daily passive regression against the deployed GH Pages site +
-# staging API. Complements the curl-based `pages-smoke.yml`: that one
-# catches CDN-layer 4xx/5xx in seconds; this one catches JS errors,
-# missing widget bundles, and broken SDK calls that a status-code
-# probe can't see.
+# Passive regression against the deployed GH Pages site + staging API.
+# Complements the curl-based `pages-smoke.yml`: that one catches
+# CDN-layer 4xx/5xx in seconds; this one catches JS errors, missing
+# widget bundles, and broken SDK calls that a status-code probe can't
+# see.
+#
+# Triggers: master pushes (post-deploy verification) and manual dispatch.
+# No cron — run on demand or when master changes.
 #
 # Concurrency cancels in-flight runs of the same ref so a rapid push
 # train doesn't pile up.
 
 on:
-  schedule:
-    # 12:00 UTC daily.
-    - cron: "0 12 * * *"
   push:
     branches: [master]
   workflow_dispatch:

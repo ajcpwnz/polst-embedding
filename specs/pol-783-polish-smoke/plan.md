@@ -29,16 +29,18 @@ and the test run. Nothing in `/docs/` changes.
 ## Files
 
 - `.github/workflows/smoke.yml` — new workflow.
-  - Triggers: `schedule: "0 12 * * *"` (daily at 12:00 UTC),
-    `push` to `master`, `workflow_dispatch`.
+  - Triggers: `push` to `master`, `workflow_dispatch`. **No `schedule`
+    block** — the ticket initially called for a daily cron, but the
+    project owner decided against an idle scheduled run; manual
+    dispatch + post-master-deploy verification covers the "is staging
+    healthy?" question on demand.
   - One `smoke` job on `ubuntu-latest`.
   - Steps: checkout, setup Node 22, `npm ci` in `tests/smoke`, install
     only Chromium (`npx playwright install --with-deps chromium`),
     `npx playwright test`, upload `playwright-report` on failure.
   - Concurrency: `group: smoke-${{ github.ref }}, cancel-in-progress: true`
     so push-triggered runs supersede in-flight ones.
-  - Total runtime budget: under 2 min per acceptance criterion. Daily
-    scheduled run is a single job, so concurrency isn't a cost issue.
+  - Total runtime budget: under 2 min per acceptance criterion.
 - `tests/smoke/package.json` — minimal Node 22 project. Pins
   `@playwright/test` (caret-pinned to a known stable major). No other
   deps. `engines.node = ">=22"`. Scripts: `test` → `playwright test`,
