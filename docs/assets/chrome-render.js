@@ -5,7 +5,12 @@
 // `renderEmptyState()` is exposed so each per-mode demo can render the
 // paste-prompt placeholder while no polst is selected.
 
-import { ENVS, getEnv, getPolstTarget } from './chrome.js';
+import {
+  ENVS,
+  getEnv,
+  getPolstTarget,
+  installHealthBanner,
+} from './chrome.js';
 
 const SOURCE_BASE =
   'https://github.com/ajcpwnz/polst-embedding/blob/master/';
@@ -192,16 +197,47 @@ export function renderEmptyState(containerEl) {
 }
 
 /**
+ * Locate or inject the health-banner mount point. Returns the
+ * `<div id="chrome-health">` element, creating one and inserting it
+ * directly above the chrome shell (or prepending to `<body>`) if it
+ * doesn't already exist.
+ *
+ * @param {HTMLElement | null} chromeEl
+ * @returns {HTMLElement | null}
+ */
+function ensureHealthMount(chromeEl) {
+  let healthEl = document.getElementById('chrome-health');
+  if (healthEl) return healthEl;
+  if (!document.body) return null;
+  healthEl = document.createElement('div');
+  healthEl.id = 'chrome-health';
+  if (chromeEl && chromeEl.parentNode) {
+    chromeEl.parentNode.insertBefore(healthEl, chromeEl);
+  } else {
+    document.body.insertBefore(healthEl, document.body.firstChild);
+  }
+  return healthEl;
+}
+
+/**
  * Convenience: wire DOMContentLoaded → renderChrome + (when no polst)
  * renderEmptyState. Each per-mode page can call this directly to
  * minimize boilerplate.
  *
- * @param {{ sourcePath: string }} opts
+ * Also injects a health banner above the chrome shell unless
+ * `opts.skipHealthBanner` is set. Per-page HTML doesn't need to change
+ * — `bootstrap()` creates `<div id="chrome-health">` on demand.
+ *
+ * @param {{ sourcePath: string, skipHealthBanner?: boolean }} opts
  */
 export function bootstrap(opts) {
   const run = () => {
     const chromeEl = document.getElementById('chrome');
     const demoEl = document.getElementById('demo');
+    if (!opts || !opts.skipHealthBanner) {
+      const healthEl = ensureHealthMount(chromeEl);
+      if (healthEl) installHealthBanner(healthEl);
+    }
     if (chromeEl) renderChrome(chromeEl, opts);
     if (demoEl && !getPolstTarget()) renderEmptyState(demoEl);
   };
