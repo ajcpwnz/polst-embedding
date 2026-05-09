@@ -29,7 +29,7 @@
         line-height: 1.5;
       }
       .demo-wrap {
-        max-width: 720px;
+        max-width: 880px;
         margin: 0 auto;
         padding: 32px 24px 96px;
       }
@@ -38,11 +38,87 @@
         margin: 0 0 8px;
         letter-spacing: -0.02em;
       }
+      .demo-wrap h2 {
+        font-size: 1.15rem;
+        margin: 32px 0 12px;
+        letter-spacing: -0.01em;
+      }
       .demo-wrap .icon {
         font-size: 2rem;
         line-height: 1;
         display: block;
         margin-bottom: 12px;
+      }
+      .demo-wrap p.lede {
+        margin: 0 0 8px;
+        color: var(--muted);
+        max-width: 640px;
+      }
+      .demo-wrap ul,
+      .demo-wrap ol {
+        padding-left: 1.25rem;
+      }
+      .demo-wrap li {
+        margin-bottom: 6px;
+      }
+      .demo-wrap code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.9em;
+        padding: 1px 5px;
+        border-radius: 4px;
+        background: color-mix(in srgb, var(--fg) 8%, transparent);
+      }
+      .and-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 16px;
+        margin: 0;
+      }
+      .and-grid figure {
+        margin: 0;
+        padding: 8px;
+        border: 1px solid color-mix(in srgb, var(--fg) 12%, transparent);
+        border-radius: 8px;
+        background: color-mix(in srgb, var(--fg) 3%, transparent);
+      }
+      .and-grid img {
+        width: 100%;
+        aspect-ratio: 16 / 10;
+        object-fit: cover;
+        display: block;
+        border-radius: 4px;
+        background: color-mix(in srgb, var(--fg) 10%, transparent);
+      }
+      .and-grid figcaption {
+        margin-top: 8px;
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+      .and-callout {
+        margin: 24px 0 0;
+        padding: 12px 16px;
+        border-left: 3px solid var(--muted);
+        background: color-mix(in srgb, var(--fg) 5%, transparent);
+        border-radius: 0 6px 6px 0;
+        color: var(--fg);
+      }
+      .and-callout p {
+        margin: 0;
+      }
+      pre {
+        overflow-x: auto;
+        margin: 12px 0 0;
+        padding: 16px;
+        border-radius: 8px;
+        background: color-mix(in srgb, var(--fg) 6%, transparent);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.875rem;
+        line-height: 1.5;
+      }
+      pre code {
+        background: transparent;
+        padding: 0;
+        font-size: inherit;
       }
     </style>
   </head>
@@ -51,7 +127,166 @@
     <div class="demo-wrap">
       <span class="icon" aria-hidden="true">🤖</span>
       <h1>Android SDK</h1>
-      <main id="demo"></main>
+      <p class="lede">
+        Embed Polst inside an Android app with first-class Compose and
+        XML View support, native rendering, and an offline-friendly
+        vote replay queue. This page is informational — there's no
+        live render here. Clone the sandbox app to try it on a device
+        or emulator.
+      </p>
+      <main id="demo">
+        <section class="and-features">
+          <h2>What you get</h2>
+          <ul>
+            <li>
+              First-class <strong>Jetpack Compose</strong> support
+              via the <code>PolstView</code> composable, plus an XML
+              <code>View</code> for legacy view-based screens.
+            </li>
+            <li>
+              <strong>Native rendering</strong> — no
+              <code>WebView</code>, no JS bridge. The widget draws
+              with the host app's Compose / Material 3 stack.
+            </li>
+            <li>
+              <strong>Offline cache</strong> — last-fetched polst
+              payloads are persisted so the widget renders even when
+              the device is offline.
+            </li>
+            <li>
+              <strong>Vote replay queue</strong> — votes cast offline
+              are queued in a local Room database and replayed by a
+              <code>WorkManager</code> job once connectivity returns.
+            </li>
+            <li>
+              Encrypted device-id and token storage via
+              <code>EncryptedSharedPreferences</code>.
+            </li>
+            <li>
+              Theming via <code>PolstThemeProvider</code> with
+              built-in light / dark palettes (or roll your own).
+            </li>
+          </ul>
+        </section>
+
+        <section class="and-shots">
+          <h2>Screenshots</h2>
+          <div class="and-grid">
+            <figure>
+              <img
+                src="../assets/android/compose-single.png"
+                alt="A single Polst rendered with the Jetpack Compose PolstView composable in the sandbox app."
+              />
+              <figcaption>
+                Single Polst rendered via the Compose
+                <code>PolstView</code>.
+              </figcaption>
+            </figure>
+            <figure>
+              <img
+                src="../assets/android/xml-view.png"
+                alt="The same Polst rendered with the legacy XML View surface in the sandbox app."
+              />
+              <figcaption>
+                Same Polst rendered via the XML <code>View</code>
+                surface for legacy screens.
+              </figcaption>
+            </figure>
+            <figure>
+              <img
+                src="../assets/android/offline-replay.png"
+                alt="The offline replay queue flushing a queued vote once connectivity returns."
+              />
+              <figcaption>
+                Offline replay queue flushing once connectivity
+                returns.
+              </figcaption>
+            </figure>
+          </div>
+        </section>
+
+        <section class="and-tryit">
+          <h2>Try it locally</h2>
+          <ol>
+            <li>
+              Clone the embedding repo:
+              <code>git clone git@github.com:ajcpwnz/polst-embedding.git</code>.
+            </li>
+            <li>
+              Open the <code>android/</code> directory in
+              <strong>Android Studio</strong>, or build the debug APK
+              from the CLI:
+              <code>./gradlew :example:assembleDebug</code>.
+            </li>
+            <li>
+              Follow
+              <a href="../../android/README.md"><code>android/README.md</code></a>
+              for sandbox-specific run notes.
+            </li>
+            <li>
+              For SDK source, issues, and releases, see the upstream
+              <a href="https://github.com/ajcpwnz/polst-android"><code>polst-android</code></a>
+              repo.
+            </li>
+          </ol>
+        </section>
+
+        <aside class="and-callout">
+          <p>
+            <strong>Vendored mirror.</strong>
+            <code>android/sdk/</code> in this embedding repo is a
+            vendored mirror of the upstream
+            <a href="https://github.com/ajcpwnz/polst-android"><code>polst-android</code></a>
+            SDK, kept here so the sandbox builds out of the box.
+            Bug fixes and feature work should go upstream first; the
+            mirror is refreshed periodically to track upstream
+            releases.
+          </p>
+        </aside>
+
+        <section class="and-snippet">
+          <h2>Minimal Compose integration</h2>
+          <p>
+            The canonical "render a polst" call. Install the client
+            once at app startup, then drop a <code>PolstView</code>
+            anywhere in your Compose tree.
+          </p>
+          <pre><code class="language-kotlin">import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Surface
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.polst.sdk.PolstClient
+import com.polst.sdk.core.theme.PolstTheme
+import com.polst.sdk.core.theme.PolstThemeProvider
+import com.polst.sdk.core.theme.light
+import com.polst.sdk.ui.PolstView
+
+class MainActivity : ComponentActivity() {
+  override fun onCreate(savedInstanceState: Bundle?) {
+    super.onCreate(savedInstanceState)
+
+    // One-time at app startup (typically Application.onCreate).
+    PolstClient.installDefault(PolstClient.forContext(this))
+
+    setContent {
+      PolstThemeProvider(theme = PolstTheme.light) {
+        Surface(modifier = Modifier.padding(24.dp)) {
+          PolstView(shortId = "abc123XYZ_")
+        }
+      }
+    }
+  }
+}</code></pre>
+          <p>
+            Replace <code>"abc123XYZ_"</code> with any real 10-char
+            Polst short id. The snippet is shape-only; copy-paste it
+            into a Kotlin Activity to render a single polst end-to-end.
+          </p>
+        </section>
+      </main>
     </div>
     <script type="module">
       import { bootstrap } from '../assets/chrome-render.js';
